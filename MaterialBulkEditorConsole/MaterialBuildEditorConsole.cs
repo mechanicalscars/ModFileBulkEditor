@@ -101,7 +101,6 @@ public class MaterialBulkEditor
         material.GetOrAddShaderKey(shaderVertexModeKey, vertexModeMulti);
         material.GetOrAddShaderKey(shaderTextureModeKey, textureModeCompatability);
 
-
         var diffuse_texture_path = texture_subpaths_zoomed.Any(s => materialPath.Contains(s)) ? scar_stone_texture_x4_path : scar_stone_texture_path;
         SetShaderTexture(material, ShpkFile.DiffuseSamplerId, diffuse_texture_path);
         SetShaderTexture(material, ShpkFile.IndexSamplerId, white_texture_path);
@@ -110,20 +109,14 @@ public class MaterialBulkEditor
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-            if (material_subpaths_accents.Any(s => materialPath.Contains(s)))
-            {
-                table[30].DiffuseColor = whiteDarkerHalfColor;
-            }
-            else
-            {
-                table[30].DiffuseColor = whiteHalfColor;
-            }
+            table[30].DiffuseColor = (material_subpaths_accents.Any(s => materialPath.Contains(s))) ? whiteDarkerHalfColor : whiteHalfColor;
             table[30].SpecularColor = whiteHalfColor;
             table[30].Roughness = (Half)0.25;
             table[30].Metalness = (Half)0.10;
             table[30].SheenRate = (Half)0.80;
             table[30].SheenTintRate = (Half)0.20;
             table[30].SheenAperture = (Half)5.0;
+            table[30].Scalar11 = (Half)1.0;
         }
         return material;
     }
