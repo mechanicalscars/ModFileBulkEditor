@@ -9,6 +9,7 @@ public class MaterialBulkEditor
     static readonly string JadeFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Jade";
     static readonly string GoldFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Gold";
     static readonly string StoneMarbleFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Stone (Marble)";
+    static readonly string StoneMatteFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Stone (Matte)";
 
     static readonly string scar_stone_texture_path = "scar/textures/stone.tex";
     static readonly string scar_stone_texture_x4_path = "scar/textures/stone_x4.tex";
@@ -22,7 +23,7 @@ public class MaterialBulkEditor
     static readonly HalfColor whiteHalfColor = getHalfColorFromRGB(255, 255, 255);
     static readonly HalfColor whiteDarkerHalfColor = getHalfColorFromRGB(180, 180, 180);
 
-    static readonly HalfColor jadeHalfDiffuseColour = getHalfColorFromRGB(10, 53, 40);
+    static readonly HalfColor jadeHalfDiffuseColour = getHalfColorFromRGB(50, 131, 99);
     static readonly HalfColor jadeHalfDarkerColour = getHalfColorFromRGB(3, 20, 20);
     static readonly HalfColor jadeHalfAccentColour = getHalfColorFromRGB(196, 19, 19);
     static readonly HalfColor jadeHalfSpecularColour = getHalfColorFromRGB(172, 254, 187);
@@ -53,8 +54,9 @@ public class MaterialBulkEditor
 
     public static void Main(string[] args)
     {
-        // convertDirectory(StoneMarbleFolder, turnMaterialStoneMarbleWhite);
-        //convertDirectory(GoldFolder, turnMaterialGold);
+        convertDirectory(StoneMarbleFolder, turnMaterialStoneMarble);
+        convertDirectory(StoneMatteFolder, turnMaterialStoneMatte);
+        convertDirectory(GoldFolder, turnMaterialGold);
         convertDirectory(JadeFolder, turnMaterialJade);
     }
 
@@ -79,11 +81,7 @@ public class MaterialBulkEditor
     {
         byte[] file = File.ReadAllBytes(materialPath);
         MtrlFile material = new(file);
-        material = materiealConvertor(material, materialPath);
-        File.WriteAllBytes(materialPath, material.Write());
-    }
-    static MtrlFile turnMaterialStoneMarbleWhite(MtrlFile material, string materialPath)
-    {
+
         if (!material.IsDawntrail)
         {
             material.MigrateToDawntrail();
@@ -96,6 +94,12 @@ public class MaterialBulkEditor
         SetShaderTexture(material, ShpkFile.DiffuseSamplerId, diffuse_texture_path);
         SetShaderTexture(material, ShpkFile.IndexSamplerId, white_texture_path);
         SetShaderTexture(material, ShpkFile.MaskSamplerId, white_texture_path);
+
+        material = materiealConvertor(material, materialPath);
+        File.WriteAllBytes(materialPath, material.Write());
+    }
+    static MtrlFile turnMaterialStoneMarble(MtrlFile material, string materialPath)
+    {
 
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
@@ -112,10 +116,25 @@ public class MaterialBulkEditor
         return material;
     }
 
+    static MtrlFile turnMaterialStoneMatte(MtrlFile material, string materialPath)
+    {
+        IColorTable? Table = material.Table;
+        if (Table is ColorTable table)
+        {
+            table[30].DiffuseColor = (material_subpaths_accents.Any(s => materialPath.Contains(s))) ? whiteDarkerHalfColor : whiteHalfColor;
+            table[30].SpecularColor = whiteHalfColor;
+            table[30].Roughness = (Half)0.60;
+            table[30].Metalness = (Half)0.10;
+            table[30].SheenRate = (Half)0.20;
+            table[30].SheenTintRate = (Half)0.20;
+            table[30].SheenAperture = (Half)5.0;
+            table[30].Scalar11 = (Half)1.0;
+        }
+        return material;
+    }
+
     static MtrlFile turnMaterialGold(MtrlFile material, string materialPath)
     {
-        //EditConstantValue(material, FauxWindAmplitudeKey, 0);
-        //EditConstantValue(material, fauxWindMultiplierKey, 0);
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
