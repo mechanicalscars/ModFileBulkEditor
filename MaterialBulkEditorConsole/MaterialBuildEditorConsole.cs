@@ -3,7 +3,6 @@ using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Structs;
 using System.Collections;
 using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 
@@ -56,14 +55,15 @@ public class MaterialBulkEditor
     }
 
     private delegate MtrlFile MaterialConvertor(MtrlFile material, string MaterialPath);
+    //private delegate MtrlFile TextureConvertor(MtrlFile texture, string TexturePath);
 
     public static void Main(string[] args)
     {
-        var stoneMarbleMapping = convertDirectory(StoneMarbleFolder, turnMaterialStoneMarble);
-        var stoneMatteMapping = convertDirectory(StoneMatteFolder, turnMaterialStoneMatte);
-        var goldMapping = convertDirectory(GoldFolder, turnMaterialGold);
-        var jadeMapping = convertDirectory(JadeFolder, turnMaterialJade);
-
+        convertDirectory(StoneMarbleFolder, turnMaterialStoneMarble);
+        convertDirectory(StoneMatteFolder, turnMaterialStoneMatte);
+        convertDirectory(GoldFolder, turnMaterialGold);
+        convertDirectory(JadeFolder, turnMaterialJade);
+        //var mappings = getMappingsFromFolder(StoneMarbleFolder);
         //var idMappings = stoneMarbleMapping.Where(x => x.Key.Contains("_id.tex")).ToDictionary();
         //var baseMappings = stoneMarbleMapping.Where(x => x.Key.Contains("_base.tex") || x.Key.Contains("_b.tex")).ToDictionary();
         //var maskMappings = stoneMarbleMapping.Where(x => x.Key.Contains("_mask.tex") || x.Key.Contains("_m.tex")).ToDictionary();
@@ -71,34 +71,25 @@ public class MaterialBulkEditor
         //File.WriteAllText(JSONOutputFile, jsonMapping);
     }
 
-    static Dictionary<string,string> convertDirectory(string folderPath, MaterialConvertor materiealConvertor)
+    static void convertDirectory(string folderPath, MaterialConvertor materialConvertor)
     {
-        Dictionary<string, string> textureMappings = [];
         string[] childDirectories = Directory.GetDirectories(folderPath);
         string[] childFiles = Directory.GetFiles(folderPath);
         foreach (string directory in childDirectories)
         {
-            var directoryMappings = convertDirectory(directory, materiealConvertor);
-            foreach(var mapping in directoryMappings)
-            {
-                textureMappings[mapping.Key] = mapping.Value;
-            } 
+            convertDirectory(directory, materialConvertor);
         }
         foreach (string file in childFiles)
         {
             if (File.Exists(file) && file.EndsWith(".mtrl"))
             {
-                var fileMappings = convertMaterial(file, materiealConvertor);
-                foreach (var mapping in fileMappings)
-                {
-                    textureMappings[mapping.Key] = mapping.Value;
-                }
+                 convertMaterial(file, materialConvertor);
             }
+           
         }
-        return textureMappings;
     }
 
-    static Dictionary<string,string> convertMaterial(string materialPath, MaterialConvertor materiealConvertor)
+    static void convertMaterial(string materialPath, MaterialConvertor materialConvertor)
     {
         byte[] file = File.ReadAllBytes(materialPath);
         MtrlFile material = new(file);
@@ -109,26 +100,57 @@ public class MaterialBulkEditor
         }
         material.ShaderPackage.Name = character_package_name;
         material.GetOrAddShaderKey(shaderVertexModeKey, vertexModeMulti);
-        material.GetOrAddShaderKey(shaderTextureModeKey, textureModeCompatability);
+        material.GetOrAddShaderKey(shaderTextureModeKey, textureModeCompatability);;
 
-        //var normalPath = GetNormalPath(material, materialPath);
-
-        //var diffusePath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "base") : normalPath.Replace("_n", "_b");
-        //var indexPath = normalPath.Contains("_norm") ? normalPath.Replace("_norm", "_id") : normalPath.Replace("_n", "_id");
-        //var maskPath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "mask") : normalPath.Replace("_n", "_m");
-        //var diffuseTexturePath = texture_subpaths_zoomed.Any(s => materialPath.Contains(s)) ? scar_stone_texture_x4_path : scar_stone_texture_path;
-
-        //SetShaderTexture(material, ShpkFile.DiffuseSamplerId, diffusePath);
-        //SetShaderTexture(material, ShpkFile.IndexSamplerId, indexPath);
-        //SetShaderTexture(material, ShpkFile.MaskSamplerId, maskPath);
-
-        material = materiealConvertor(material, materialPath);
+        material = materialConvertor(material, materialPath);
         File.WriteAllBytes(materialPath, material.Write());
-        return new Dictionary<string, string>();
-        //return new Dictionary<string,string>{ { diffusePath, diffuseTexturePath},
-        //        { indexPath, white_texture_path},
-        //        { maskPath, white_texture_path} };
     }
+
+    static Dictionary<string, string> getMappingsFromFolder(string folderPath)
+    {
+        Dictionary<string, string> textureMappings = [];
+        string[] childDirectories = Directory.GetDirectories(folderPath);
+        string[] childFiles = Directory.GetFiles(folderPath);
+        foreach (string directory in childDirectories)
+        {
+            var directoryMappings = getMappingsFromFolder(directory);
+            foreach (var mapping in directoryMappings)
+            {
+                textureMappings[mapping.Key] = mapping.Value;
+            }
+        }
+        foreach (string file in childFiles)
+        {
+            if (File.Exists(file) && file.EndsWith(".mtrl"))
+            {
+                var fileMappings = getMaterialMappings(file);
+                foreach (var mapping in fileMappings)
+                {
+                    textureMappings[mapping.Key] = mapping.Value;
+                }
+            }
+        }
+        return textureMappings;
+    }
+
+    static Dictionary<string, string> getMaterialMappings(string materialPath)
+    {
+        byte[] file = File.ReadAllBytes(materialPath);
+        MtrlFile material = new(file);
+
+        var normalPath = GetNormalPath(material, materialPath);
+
+        var diffusePath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "base") : normalPath.Replace("_n", "_b");
+        var indexPath = normalPath.Contains("_norm") ? normalPath.Replace("_norm", "_id") : normalPath.Replace("_n", "_id");
+        var maskPath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "mask") : normalPath.Replace("_n", "_m");
+        var diffuseTexturePath = texture_subpaths_zoomed.Any(s => materialPath.Contains(s)) ? scar_stone_texture_x4_path : scar_stone_texture_path;
+
+        return new Dictionary<string,string>{ { diffusePath, diffuseTexturePath},
+                { indexPath, white_texture_path},
+                { maskPath, white_texture_path} };
+    }
+
+
 
     static MtrlFile turnMaterialStoneMarble(MtrlFile material, string materialPath)
     {
@@ -236,26 +258,7 @@ public class MaterialBulkEditor
         material.Textures[textureIndex].Path = texture_path;
     }
 
-    /*
-     * WARNING WARNING WARNING DANGER WILL ROBINSON
-     * The constants in the material file are stored as a long byte array, 
-     * and Penumbra does NOT have the functions in it to pull one out and politely update it.
-     * We have to slice into that byte array and change the values in it, and carefully place them back.
-     * This means this function is horrifically unsafe for use and if you are going to use it:
-     * Dear GODS please make sure you have back ups of the material files you're almost certainly about to break.
-     */
-    private static void EditConstantValue(MtrlFile material, uint constantKey, float newValue)
-    {
-        // Game has to be running to get the shader pack? figure out a work around I guess.
-        //var constantIndex = material.FindOrAddConstant(constantKey);
-        //if (constantIndex == -1)
-        //{
-        //    throw new Exception("You didn't have the right constant key for the thing you were trying to update. Not even going to make it for you because this is just that fragile. Try again.");
-        //}
-        //var constant = material.ShaderPackage.Constants[constantIndex];
-        //var constantValue = material.GetConstantValue<float>(constant);
-        //constantValue.Fill(newValue);
-    }
+
 
     /*
      * Taken from Penumbra.UI.FileEditing.Materials.MaterialEditor
