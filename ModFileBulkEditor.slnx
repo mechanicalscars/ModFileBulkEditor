@@ -2,5 +2,5 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
-  <Project Path="MaterialBulkEditorConsole/MaterialBulkEditorConsole.csproj" />
+  <Project Path="ModFileBulkEditor/ModFileBulkEditor.csproj" />
 </Solution>
