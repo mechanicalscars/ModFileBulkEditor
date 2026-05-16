@@ -1,19 +1,25 @@
 ﻿using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Structs;
+using System.Collections;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json;
 
 
 public class MaterialBulkEditor
 {
+    static readonly string JSONOutputFile = "E:\\FFXIVModsDT\\[Scar] Statues\\bulkEditorOutput.json";
+
     static readonly string JadeFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Jade";
     static readonly string GoldFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Gold";
     static readonly string StoneMarbleFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Stone (Marble)";
     static readonly string StoneMatteFolder = "E:\\FFXIVModsDT\\[Scar] Statues\\Material\\Stone (Matte)";
 
-    static readonly string scar_stone_texture_path = "scar/textures/stone.tex";
-    static readonly string scar_stone_texture_x4_path = "scar/textures/stone_x4.tex";
-    static readonly string white_texture_path = "chara/common/texture/white.tex";
+    static readonly string scar_stone_texture_path = "scar\\textures\\stone.tex";
+    static readonly string scar_stone_texture_x4_path = "scar\\textures\\stone_x4.tex";
+    static readonly string white_texture_path = "scar\\textures\\white.tex";
 
     static readonly string[] texture_subpaths_zoomed = ["_fac_a", "hir_a", "_etc_", "_acc_"];
     static readonly string[] material_subpaths_accents = ["_etc_", "_acc_"];
@@ -36,9 +42,8 @@ public class MaterialBulkEditor
     static readonly uint textureModeCompatability = 1611594207;
     static readonly uint vertexModeMulti = 2815623008;
 
-    static readonly uint fauxWindMultiplierKey = 1611594207;
-    static readonly uint FauxWindAmplitudeKey = 2815623008;
-
+    //static readonly uint fauxWindMultiplierKey = 1611594207;
+    //static readonly uint FauxWindAmplitudeKey = 2815623008;
 
     static HalfColor getHalfColorFromRGB(float red, float green, float blue)
     {
@@ -54,30 +59,46 @@ public class MaterialBulkEditor
 
     public static void Main(string[] args)
     {
-        convertDirectory(StoneMarbleFolder, turnMaterialStoneMarble);
-        convertDirectory(StoneMatteFolder, turnMaterialStoneMatte);
-        convertDirectory(GoldFolder, turnMaterialGold);
-        convertDirectory(JadeFolder, turnMaterialJade);
+        var stoneMarbleMapping = convertDirectory(StoneMarbleFolder, turnMaterialStoneMarble);
+        var stoneMatteMapping = convertDirectory(StoneMatteFolder, turnMaterialStoneMatte);
+        var goldMapping = convertDirectory(GoldFolder, turnMaterialGold);
+        var jadeMapping = convertDirectory(JadeFolder, turnMaterialJade);
+
+        //var idMappings = stoneMarbleMapping.Where(x => x.Key.Contains("_id.tex")).ToDictionary();
+        //var baseMappings = stoneMarbleMapping.Where(x => x.Key.Contains("_base.tex") || x.Key.Contains("_b.tex")).ToDictionary();
+        //var maskMappings = stoneMarbleMapping.Where(x => x.Key.Contains("_mask.tex") || x.Key.Contains("_m.tex")).ToDictionary();
+        //var jsonMapping = JsonSerializer.Serialize(new Dictionary<string, Dictionary<string, string>>{ { "id", idMappings}, {"base", baseMappings }, {"mask", maskMappings} });
+        //File.WriteAllText(JSONOutputFile, jsonMapping);
     }
 
-    static void convertDirectory(string folderPath, MaterialConvertor materiealConvertor)
+    static Dictionary<string,string> convertDirectory(string folderPath, MaterialConvertor materiealConvertor)
     {
+        Dictionary<string, string> textureMappings = [];
         string[] childDirectories = Directory.GetDirectories(folderPath);
         string[] childFiles = Directory.GetFiles(folderPath);
         foreach (string directory in childDirectories)
         {
-            convertDirectory(directory, materiealConvertor);
+            var directoryMappings = convertDirectory(directory, materiealConvertor);
+            foreach(var mapping in directoryMappings)
+            {
+                textureMappings[mapping.Key] = mapping.Value;
+            } 
         }
         foreach (string file in childFiles)
         {
             if (File.Exists(file) && file.EndsWith(".mtrl"))
             {
-                convertMaterial(file, materiealConvertor);
+                var fileMappings = convertMaterial(file, materiealConvertor);
+                foreach (var mapping in fileMappings)
+                {
+                    textureMappings[mapping.Key] = mapping.Value;
+                }
             }
         }
+        return textureMappings;
     }
 
-    static void convertMaterial(string materialPath, MaterialConvertor materiealConvertor)
+    static Dictionary<string,string> convertMaterial(string materialPath, MaterialConvertor materiealConvertor)
     {
         byte[] file = File.ReadAllBytes(materialPath);
         MtrlFile material = new(file);
@@ -90,24 +111,34 @@ public class MaterialBulkEditor
         material.GetOrAddShaderKey(shaderVertexModeKey, vertexModeMulti);
         material.GetOrAddShaderKey(shaderTextureModeKey, textureModeCompatability);
 
-        var diffuse_texture_path = texture_subpaths_zoomed.Any(s => materialPath.Contains(s)) ? scar_stone_texture_x4_path : scar_stone_texture_path;
-        SetShaderTexture(material, ShpkFile.DiffuseSamplerId, diffuse_texture_path);
-        SetShaderTexture(material, ShpkFile.IndexSamplerId, white_texture_path);
-        SetShaderTexture(material, ShpkFile.MaskSamplerId, white_texture_path);
+        //var normalPath = GetNormalPath(material, materialPath);
+
+        //var diffusePath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "base") : normalPath.Replace("_n", "_b");
+        //var indexPath = normalPath.Contains("_norm") ? normalPath.Replace("_norm", "_id") : normalPath.Replace("_n", "_id");
+        //var maskPath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "mask") : normalPath.Replace("_n", "_m");
+        //var diffuseTexturePath = texture_subpaths_zoomed.Any(s => materialPath.Contains(s)) ? scar_stone_texture_x4_path : scar_stone_texture_path;
+
+        //SetShaderTexture(material, ShpkFile.DiffuseSamplerId, diffusePath);
+        //SetShaderTexture(material, ShpkFile.IndexSamplerId, indexPath);
+        //SetShaderTexture(material, ShpkFile.MaskSamplerId, maskPath);
 
         material = materiealConvertor(material, materialPath);
         File.WriteAllBytes(materialPath, material.Write());
+        return new Dictionary<string, string>();
+        //return new Dictionary<string,string>{ { diffusePath, diffuseTexturePath},
+        //        { indexPath, white_texture_path},
+        //        { maskPath, white_texture_path} };
     }
+
     static MtrlFile turnMaterialStoneMarble(MtrlFile material, string materialPath)
     {
-
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
             table[30].DiffuseColor = (material_subpaths_accents.Any(s => materialPath.Contains(s))) ? whiteDarkerHalfColor : whiteHalfColor;
             table[30].SpecularColor = whiteHalfColor;
             table[30].Roughness = (Half)0.25;
-            table[30].Metalness = (Half)0.10;
+            table[30].Metalness = (Half)0.20;
             table[30].SheenRate = (Half)0.80;
             table[30].SheenTintRate = (Half)0.20;
             table[30].SheenAperture = (Half)5.0;
@@ -167,6 +198,23 @@ public class MaterialBulkEditor
             table[30].SheenAperture = (Half)5.0;
         }
         return material;
+    }
+
+    private static string GetNormalPath(MtrlFile material, string materialPath)
+    {
+        var samplerIndex = material.FindSampler(ShpkFile.NormalSamplerId);
+        if (samplerIndex == -1)
+        {
+            throw new Exception("Could not find Normal map sampler ID.");
+        }
+        var textureIndex = material.ShaderPackage.Samplers[samplerIndex].TextureIndex;
+
+        if (textureIndex < 0)
+        {
+            throw new Exception("Newly Created/found sampler texture has index of -1. What?");
+        }
+
+        return material.Textures[textureIndex].Path;
     }
 
 
