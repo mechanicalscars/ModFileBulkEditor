@@ -12,6 +12,11 @@
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>
+		<Reference Include="Penumbra">
+			<HintPath>$(AppData)\XIVLauncher\installedPlugins\Penumbra\1.6.1.10\Penumbra.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="Lumina">
 			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
 		</Reference>

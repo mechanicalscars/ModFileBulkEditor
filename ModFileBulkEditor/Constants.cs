@@ -1,7 +1,7 @@
-namespace ModFileBulkEditor;
-
-using System.Numerics;
 using Penumbra.GameData.Structs;
+using System.Numerics;
+
+namespace ModFileBulkEditor;
 
 public static class Constants
 {
@@ -41,10 +41,6 @@ public static class Constants
 
     static HalfColor getHalfColorFromRGB(float red, float green, float blue)
     {
-        /*
-         * Translate three 0-255 floats into three % based Half's for a half colour.
-         * Fun note: this doesn't actually work. Gotta figure out how to actually get 1:1 RGB valeus here...
-         */
         var pseudoSquared = PseudoSquareRgb(new Vector3((red / 255), (green / 255), (blue / 255)));
         return (HalfColor)pseudoSquared;
     }

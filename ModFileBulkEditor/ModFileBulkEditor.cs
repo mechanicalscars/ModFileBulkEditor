@@ -1,13 +1,9 @@
 ﻿using Penumbra.GameData.Files;
-using System.Numerics;
 
 namespace ModFileBulkEditor;
 
 public class ModFileBulkEditorMain
 {
-
-    //private delegate MtrlFile TextureConvertor(MtrlFile texture, string TexturePath);
-
     public static void Main(string[] args)
     {
         convertDirectory(Constants.StoneMarbleFolder, MaterialConvertors.turnMaterialStoneMarble);
@@ -22,21 +18,27 @@ public class ModFileBulkEditorMain
         //File.WriteAllText(JSONOutputFile, jsonMapping);
     }
 
-    static void convertDirectory(string folderPath, MaterialConvertor materialConvertor)
+    static void convertDirectory(string folderPath, MaterialConvertor? materialConvertor = null, TextureConvertor? textureConvertor = null)
     {
         string[] childDirectories = Directory.GetDirectories(folderPath);
         string[] childFiles = Directory.GetFiles(folderPath);
         foreach (string directory in childDirectories)
         {
-            convertDirectory(directory, materialConvertor);
+            convertDirectory(directory, materialConvertor, textureConvertor);
         }
         foreach (string file in childFiles)
         {
-            if (File.Exists(file) && file.EndsWith(".mtrl"))
+            if (File.Exists(file))
             {
-                 ConvertMaterial(file, materialConvertor);
+                if (file.EndsWith(".mtrl") && materialConvertor != null)
+                {
+                    ConvertMaterial(file, materialConvertor);
+                }
+                else if(file.EndsWith(".tex") && textureConvertor != null)
+                {
+
+                }
             }
-           
         }
     }
 
@@ -89,11 +91,12 @@ public class ModFileBulkEditorMain
         byte[] file = File.ReadAllBytes(materialPath);
         MtrlFile material = new(file);
 
-        var normalPath = GetNormalPath(material, materialPath);
+        var normalPath = GetNormalPath(material);
 
-        var diffusePath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "base") : normalPath.Replace("_n", "_b");
-        var indexPath = normalPath.Contains("_norm") ? normalPath.Replace("_norm", "_id") : normalPath.Replace("_n", "_id");
-        var maskPath = normalPath.Contains("_norm") ? normalPath.Replace("norm", "mask") : normalPath.Replace("_n", "_m");
+        // Assumes, niavely, that normals are only ever in the form x_norm.tex or x_n.tex .
+        var diffusePath = normalPath.Contains("_norm.tex") ? normalPath.Replace("norm.tex", "base.tex") : normalPath.Replace("_n.tex", "_b.tex");
+        var indexPath = normalPath.Contains("_norm.tex") ? normalPath.Replace("_norm.tex", "_id.tex") : normalPath.Replace("_n.tex", "_id.tex");
+        var maskPath = normalPath.Contains("_norm.tex") ? normalPath.Replace("norm.tex", "mask.tex") : normalPath.Replace("_n.tex", "_m.tex");
         var diffuseTexturePath = Constants.X4TextureSubpaths.Any(s => materialPath.Contains(s)) ? Constants.ScarStonex4TexturePath : Constants.ScarStoneTexturePath;
 
         return new Dictionary<string,string>{ { diffusePath, diffuseTexturePath},
@@ -101,7 +104,7 @@ public class ModFileBulkEditorMain
                 { maskPath, Constants.WhiteTexturePath} };
     }
 
-    private static string GetNormalPath(MtrlFile material, string materialPath)
+    private static string GetNormalPath(MtrlFile material)
     {
         var samplerIndex = material.FindSampler(ShpkFile.NormalSamplerId);
         if (samplerIndex == -1)
@@ -112,7 +115,7 @@ public class ModFileBulkEditorMain
 
         if (textureIndex < 0)
         {
-            throw new Exception("Newly Created/found sampler texture has index of -1. What?");
+            throw new Exception("Newly found sampler texture has index of -1. What?");
         }
 
         return material.Textures[textureIndex].Path;

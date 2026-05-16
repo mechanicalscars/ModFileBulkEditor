@@ -1,11 +1,11 @@
-namespace ModFileBulkEditor;
-
 using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.MaterialStructs;
-using Penumbra.GameData.Structs;
+
+namespace ModFileBulkEditor;
 
 public delegate MtrlFile MaterialConvertor(MtrlFile material, string MaterialPath);
-class MaterialConvertors
+
+public class MaterialConvertors
 {
     public static MtrlFile turnMaterialStoneMarble(MtrlFile material, string materialPath)
     {
