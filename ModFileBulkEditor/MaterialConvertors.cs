@@ -3,16 +3,20 @@ using Penumbra.GameData.Files.MaterialStructs;
 
 namespace ModFileBulkEditor;
 
-public delegate MtrlFile MaterialConvertor(MtrlFile material, string MaterialPath);
+public delegate void MaterialConvertor(FileInfo inputFile, string outputFilePath);
 
 public class MaterialConvertors
 {
-    public static MtrlFile turnMaterialStoneMarble(MtrlFile material, string materialPath)
+    public static void turnMaterialStoneMarble(FileInfo inputFile, string outputFilePath)
     {
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material);
+
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-            table[30].DiffuseColor = (Constants.AccentMaterialSubpaths.Any(s => materialPath.Contains(s))) ? Constants.whiteDarkerHalfColor : Constants.whiteHalfColor;
+            table[30].DiffuseColor = Constants.AccentMaterialSubpaths.Any(s => inputFile.Name.Contains(s)) ? Constants.whiteDarkerHalfColor : Constants.whiteHalfColor;
             table[30].SpecularColor = Constants.whiteHalfColor;
             table[30].Roughness = (Half)0.25;
             table[30].Metalness = (Half)0.20;
@@ -21,15 +25,20 @@ public class MaterialConvertors
             table[30].SheenAperture = (Half)5.0;
             table[30].Scalar11 = (Half)1.0;
         }
-        return material;
+
+        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static MtrlFile turnMaterialStoneMatte(MtrlFile material, string materialPath)
+    public static void turnMaterialStoneMatte(FileInfo inputFile, string outputFilePath)
     {
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material);
+
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-            table[30].DiffuseColor = (Constants.AccentMaterialSubpaths.Any(s => materialPath.Contains(s))) ? Constants.whiteDarkerHalfColor : Constants.whiteHalfColor;
+            table[30].DiffuseColor = Constants.AccentMaterialSubpaths.Any(s => inputFile.Name.Contains(s)) ? Constants.whiteDarkerHalfColor : Constants.whiteHalfColor;
             table[30].SpecularColor = Constants.whiteHalfColor;
             table[30].Roughness = (Half)0.60;
             table[30].Metalness = (Half)0.10;
@@ -38,29 +47,39 @@ public class MaterialConvertors
             table[30].SheenAperture = (Half)5.0;
             table[30].Scalar11 = (Half)1.0;
         }
-        return material;
+
+        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static MtrlFile turnMaterialGold(MtrlFile material, string materialPath)
+    public static void turnMaterialGold(FileInfo inputFile, string outputFilePath)
     {
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material);
+
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
 
-            table[30].DiffuseColor = (Constants.AccentMaterialSubpaths.Any(s => materialPath.Contains(s))) ? Constants.goldDarkerHalfColour : Constants.goldHalfColor;
+            table[30].DiffuseColor = Constants.AccentMaterialSubpaths.Any(s => inputFile.Name.Contains(s)) ? Constants.goldDarkerHalfColour : Constants.goldHalfColor;
             table[30].SpecularColor = Constants.whiteHalfColor;
             table[30].Roughness = (Half)0.15;
             table[30].Metalness = (Half)1;
         }
-        return material;
+
+        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static MtrlFile turnMaterialJade(MtrlFile material, string materialPath)
+    public static void turnMaterialJade(FileInfo inputFile, string outputFilePath)
     {
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material);
+
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-            var diffuseColour = materialPath switch
+            var diffuseColour = inputFile.Name switch
             {
                 string x when x.Contains("_etc_") => Constants.jadeHalfDarkerColour,
                 string x when x.Contains("_acc_") => Constants.jadeHalfAccentColour,
@@ -74,24 +93,31 @@ public class MaterialConvertors
             table[30].SheenTintRate = (Half)1;
             table[30].SheenAperture = (Half)5.0;
         }
-        return material;
+
+        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    private static void SetShaderTexture(MtrlFile material, uint samplerID, string texture_path)
+    private static MtrlFile MetaDataConversion(MtrlFile material)
     {
-        var samplerIndex = material.FindOrAddSampler(samplerID, texture_path);
-        if (samplerIndex == -1)
+        if (!material.IsDawntrail)
         {
-            throw new Exception("Newly Created/found sampler has index of -1. What?");
+            material.MigrateToDawntrail();
         }
+        material.ShaderPackage.Name = Constants.CharacterPackageName;
+        material.GetOrAddShaderKey(Constants.shaderVertexModeKey, Constants.vertexModeMulti);
+        material.GetOrAddShaderKey(Constants.shaderTextureModeKey, Constants.textureModeCompatability);
 
-        var textureIndex = material.ShaderPackage.Samplers[samplerIndex].TextureIndex;
 
-        if (textureIndex < 0)
-        {
-            throw new Exception("Newly Created/found sampler texture has index of -1. What?");
-        }
+        var normalPath = Utils.GetSamplerTexturePath(material, ShpkFile.NormalSamplerId);
+        // Assumes, Naively, that normals are only ever in the form x_norm.tex or x_n.tex .
+        var diffusePath = normalPath.Contains("_norm.tex") ? normalPath.Replace("norm.tex", "base.tex") : normalPath.Replace("_n.tex", "_d.tex");
+        var indexPath = normalPath.Contains("_norm.tex") ? normalPath.Replace("_norm.tex", "_id.tex") : normalPath.Replace("_n.tex", "_id.tex");
+        var maskPath = normalPath.Contains("_norm.tex") ? normalPath.Replace("norm.tex", "mask.tex") : normalPath.Replace("_n.tex", "_m.tex");
 
-        material.Textures[textureIndex].Path = texture_path;
+        Utils.SetSamplerTexturePath(material, ShpkFile.DiffuseSamplerId, diffusePath);
+        Utils.SetSamplerTexturePath(material, ShpkFile.IndexSamplerId, indexPath);
+        Utils.SetSamplerTexturePath(material, ShpkFile.MaskSamplerId, maskPath);
+
+        return material;
     }
 }

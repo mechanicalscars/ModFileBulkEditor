@@ -3,11 +3,11 @@ using Penumbra.Import.Textures;
 
 namespace ModFileBulkEditor;
 
-public delegate void TextureConvertor(string TexturePath);
+public delegate void TextureConvertor(FileInfo TextureFile);
 
 public class TextureConvertors
 {
-	public void ConvertIceTextures(string TexturePath)
-	{
-	}
+    public void ConvertIceTextures(FileInfo TextureFile)
+    {
+    }
 }
