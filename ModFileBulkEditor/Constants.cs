@@ -18,8 +18,8 @@ public static class Constants
 
 
     public static readonly string materialsFilesOutputJSONFile = "group_001_material.json";
-    public static readonly string baseTexturesOutputJSONFile = "group_002_base texture.json";
-    public static readonly string dollFilesOutputJSONFile = "group_003_doll joint materials.json";
+    public static readonly string baseTexturesOutputJSONFile = "group_002_base textures.json";
+    public static readonly string dollFilesOutputJSONFile = "group_003_doll materials.json";
     public static readonly string requiredFilesOutputJSONFile = "group_004_required materials.json";
     public static readonly string metaOutputJSONFile = "meta.json";
     public static readonly string defaultOutputJSONFile = "default_mod.json";
@@ -28,6 +28,7 @@ public static class Constants
     public static readonly string GoldFolder = "Gold";
     public static readonly string StoneMarbleFolder = "Stone (Marble)";
     public static readonly string StoneMatteFolder = "Stone (Matte)";
+    public static readonly string LatexBlackFolder = "Latex (Black)";
 
     public static readonly string ScarFolder = "scar";
 
@@ -41,16 +42,16 @@ public static class Constants
     public static readonly string WhiteTexturePath = "chara\\common\\texture\\white.tex";
 
     public static readonly string[] X4TextureSubpaths = ["_fac_a", "hir_a", "_etc_", "_acc_"];
-    public static readonly string[] AccentMaterialSubpaths = ["_etc_", "_acc_"];
+    public static readonly string[] AccentMaterialSubpaths = ["_etc_", "_acc_", "_fac_b"];
 
     public static readonly HalfColor goldHalfColor = Utils.getHalfColorFromRGB(245, 200, 65);
     public static readonly HalfColor goldDarkerHalfColour = Utils.getHalfColorFromRGB(110, 86, 38);
     public static readonly HalfColor whiteHalfColor = Utils.getHalfColorFromRGB(255, 255, 255);
     public static readonly HalfColor whiteDarkerHalfColor = Utils.getHalfColorFromRGB(180, 180, 180);
     public static readonly HalfColor jadeHalfDiffuseColour = Utils.getHalfColorFromRGB(50, 131, 99);
-    public static readonly HalfColor jadeHalfDarkerColour = Utils.getHalfColorFromRGB(3, 20, 20);
-    public static readonly HalfColor jadeHalfAccentColour = Utils.getHalfColorFromRGB(196, 19, 19);
+    public static readonly HalfColor jadeHalfDarkerColour = Utils.getHalfColorFromRGB(25, 85, 85);
     public static readonly HalfColor jadeHalfSpecularColour = Utils.getHalfColorFromRGB(172, 254, 187);
+    public static readonly HalfColor blackHalfColor = Utils.getHalfColorFromRGB(0, 0, 0);
 
     public static readonly string CharacterPackageName = "character.shpk";
 
@@ -72,10 +73,13 @@ public static class Constants
     public static readonly Dictionary<string, string> additionalMaterialMappings = new() {
         { "chara/human/c0401/obj/body/b0001/material/v0001/mt_c0401b0001_a.mtrl", "chara\\human\\c0201\\obj\\body\\b0001\\material\\v0001\\mt_c0201b0001_a.mtrl" },
         { "chara/human/c1801/obj/body/b0001/material/v0001/mt_c1801b0001_a.mtrl", "chara\\human\\c0201\\obj\\body\\b0001\\material\\v0001\\mt_c0201b0001_a.mtrl" },
+        { "chara/human/c1401/obj/body/b0101/material/v0001/mt_c1401b0101_a.mtrl", "chara\\human\\c1401\\obj\\body\\b0001\\material\\v0001\\mt_c1401b0001_a.mtrl" },
         { "chara/human/c0401/obj/body/b0001/material/v0001/mt_c0401b0001_b.mtrl", "chara\\human\\c0201\\obj\\body\\b0001\\material\\v0001\\mt_c0201b0001_b.mtrl" },
         { "chara/human/c1801/obj/body/b0001/material/v0001/mt_c1801b0001_b.mtrl", "chara\\human\\c0201\\obj\\body\\b0001\\material\\v0001\\mt_c0201b0001_b.mtrl" },
+        { "chara/human/c1401/obj/body/b0101/material/v0001/mt_c1401b0101_b.mtrl", "chara\\human\\c1401\\obj\\body\\b0001\\material\\v0001\\mt_c1401b0001_b.mtrl" },
         { "chara/human/c0401/obj/body/b0001/material/v0001/mt_c0401b0001_bibo.mtrl", "chara\\human\\c0201\\obj\\body\\b0001\\material\\v0001\\mt_c0201b0001_bibo.mtrl" },
         { "chara/human/c1801/obj/body/b0001/material/v0001/mt_c1801b0001_bibo.mtrl", "chara\\human\\c0201\\obj\\body\\b0001\\material\\v0001\\mt_c0201b0001_bibo.mtrl" },
+        { "chara/human/c1401/obj/body/b0101/material/v0001/mt_c1401b0101_bibo.mtrl", "chara\\human\\c1401\\obj\\body\\b0001\\material\\v0001\\mt_c1401b0001_bibo.mtrl" },
         { "chara/human/c0201/obj/hair/h0052/material/v0001/mt_c0201h0052_acc_b.mtrl", "chara\\human\\c0201\\obj\\hair\\h0051\\material\\v0001\\mt_c0201h0051_acc_b.mtrl" },
         { "chara/human/c0201/obj/hair/h0053/material/v0001/mt_c0201h0053_acc_b.mtrl", "chara\\human\\c0201\\obj\\hair\\h0051\\material\\v0001\\mt_c0201h0051_acc_b.mtrl" },
         { "chara/human/c0201/obj/hair/h0052/material/v0001/mt_c0201h0052_hir_a.mtrl", "chara\\human\\c0201\\obj\\hair\\h0051\\material\\v0001\\mt_c0201h0051_hir_a.mtrl" },
@@ -156,9 +160,11 @@ public static class Constants
         { "chara/human/c1401/obj/body/b0001/material/v0001/mt_c1401b0001_b.mtrl", "chara\\human\\c1401\\obj\\body\\b0001\\material\\v0001\\mt_c1401b0001_b.mtrl" },
         { "chara/human/c1401/obj/body/b0001/material/v0001/mt_c1401b0001_bibo.mtrl", "chara\\human\\c1401\\obj\\body\\b0001\\material\\v0001\\mt_c1401b0001_bibo.mtrl" },
         { "chara/human/c1401/obj/face/f0101/material/mt_c1401f0101_fac_c.mtrl", "chara\\human\\c1401\\obj\\face\\f0001\\material\\mt_c1401f0001_fac_c.mtrl" },
+        { "chara/human/c1401/obj/face/f0104/material/mt_c1401f0104_fac_c.mtrl", "chara\\human\\c1401\\obj\\face\\f0004\\material\\mt_c1401f0004_fac_c.mtrl" },
+        { "chara/human/c1401/obj/face/f0101/material/mt_c1401f0101_fac_b.mtrl", "chara\\human\\c1401\\obj\\face\\f0001\\material\\mt_c1401f0001_fac_b.mtrl" },
         { "chara/human/c1401/obj/face/f0102/material/mt_c1401f0102_fac_b.mtrl", "chara\\human\\c1401\\obj\\face\\f0002\\material\\mt_c1401f0002_fac_b.mtrl" },
         { "chara/human/c1401/obj/face/f0103/material/mt_c1401f0103_fac_b.mtrl", "chara\\human\\c1401\\obj\\face\\f0003\\material\\mt_c1401f0003_fac_b.mtrl" },
-        { "chara/human/c1401/obj/face/f0104/material/mt_c1401f0104_fac_c.mtrl", "chara\\human\\c1401\\obj\\face\\f0004\\material\\mt_c1401f0004_fac_c.mtrl" },
+        { "chara/human/c1401/obj/face/f0104/material/mt_c1401f0104_fac_b.mtrl", "chara\\human\\c1401\\obj\\face\\f0004\\material\\mt_c1401f0004_fac_b.mtrl" },
         { "chara/human/c1401/obj/tail/t0101/material/v0001/mt_c1401t0101_a.mtrl", "chara\\human\\c1401\\obj\\tail\\t0001\\material\\v0001\\mt_c1401t0001_a.mtrl" },
         { "chara/human/c1401/obj/tail/t0102/material/v0001/mt_c1401t0102_a.mtrl", "chara\\human\\c1401\\obj\\tail\\t0002\\material\\v0001\\mt_c1401t0002_a.mtrl" },
         { "chara/human/c1401/obj/tail/t0103/material/v0001/mt_c1401t0103_a.mtrl", "chara\\human\\c1401\\obj\\tail\\t0003\\material\\v0001\\mt_c1401t0003_a.mtrl" },
@@ -166,7 +172,10 @@ public static class Constants
         { "chara/human/c1601/obj/face/f0005/material/mt_c1601f0005_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0105\\material\\mt_c1601f0105_fac_a.mtrl" },
         { "chara/human/c1601/obj/face/f0006/material/mt_c1601f0006_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0106\\material\\mt_c1601f0106_fac_a.mtrl" },
         { "chara/human/c1601/obj/face/f0007/material/mt_c1601f0007_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0107\\material\\mt_c1601f0107_fac_a.mtrl" },
-        { "chara/human/c1601/obj/face/f0008/material/mt_c1601f0008_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0108\\material\\mt_c1601f0108_fac_a.mtrl" }
+        { "chara/human/c1601/obj/face/f0008/material/mt_c1601f0008_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0108\\material\\mt_c1601f0108_fac_a.mtrl" },
+        { "chara/human/c1601/obj/face/f0108/material/mt_c1601f0108_fac_b.mtrl", "chara\\human\\c1601\\obj\\face\\f0008\\material\\mt_c1601f0008_fac_b.mtrl" },
+
+        
      };
 
     public static readonly Dictionary<string, string> additionalDollMappings = new() {

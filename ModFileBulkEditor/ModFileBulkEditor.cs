@@ -16,6 +16,7 @@ public class ModFileBulkEditorMain
             (Constants.StoneMatteFolder, MaterialConvertors.turnMaterialStoneMatte, null),
             (Constants.GoldFolder, MaterialConvertors.turnMaterialGold, null),
             (Constants.JadeFolder, MaterialConvertors.turnMaterialJade, null),
+            (Constants.LatexBlackFolder, MaterialConvertors.turnMaterialBlack, null),
             };
 
         foreach ((var optionFolder, var materialConvertor, var textureConvertor) in foldersAndConvertors)

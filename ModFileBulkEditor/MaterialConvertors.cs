@@ -65,6 +65,7 @@ public class MaterialConvertors
             table[30].SpecularColor = Constants.whiteHalfColor;
             table[30].Roughness = (Half)0.15;
             table[30].Metalness = (Half)1;
+            table[30].Scalar11 = (Half)1.0;
         }
 
         File.WriteAllBytes(outputFilePath, material.Write());
@@ -79,23 +80,43 @@ public class MaterialConvertors
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-            var diffuseColour = inputFile.Name switch
-            {
-                string x when x.Contains("_etc_") => Constants.jadeHalfDarkerColour,
-                string x when x.Contains("_acc_") => Constants.jadeHalfAccentColour,
-                _ => Constants.jadeHalfDiffuseColour
-            };
-            table[30].DiffuseColor = diffuseColour;
+
+            table[30].DiffuseColor = Constants.AccentMaterialSubpaths.Any(s => inputFile.Name.Contains(s)) ? Constants.jadeHalfDarkerColour : Constants.jadeHalfDiffuseColour;
             table[30].SpecularColor = Constants.jadeHalfSpecularColour;
             table[30].Roughness = (Half)0.10;
             table[30].Metalness = (Half)0.25;
             table[30].SheenRate = (Half)0.20;
             table[30].SheenTintRate = (Half)1;
             table[30].SheenAperture = (Half)5.0;
+            table[30].Scalar11 = (Half)1.0;
         }
 
         File.WriteAllBytes(outputFilePath, material.Write());
     }
+
+    public static void turnMaterialBlack(FileInfo inputFile, string outputFilePath)
+    {
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material);
+
+        IColorTable? Table = material.Table;
+        if (Table is ColorTable table)
+        {
+
+            table[30].DiffuseColor = Constants.blackHalfColor;
+            table[30].SpecularColor = Constants.whiteHalfColor;
+            table[30].Roughness = (Half)0.00;
+            table[30].Metalness = (Half)0.50;
+            table[30].SheenRate = (Half)1.0;
+            table[30].SheenTintRate = (Half)1;
+            table[30].SheenAperture = (Half)5.0;
+            table[30].Scalar11 = (Half)1.0;
+        }
+
+        File.WriteAllBytes(outputFilePath, material.Write());
+    }
+
 
     private static MtrlFile MetaDataConversion(MtrlFile material)
     {

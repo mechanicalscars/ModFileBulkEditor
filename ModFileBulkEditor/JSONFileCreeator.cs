@@ -196,16 +196,24 @@ public class JSONFileCreator
         modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Light Marble", Constants.ScarStonex4TexturePath, Constants.ScarStoneTexturePath));
         modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Dark Marble", Constants.ScarStoneDarkerx4TexturePath, Constants.ScarStoneDarkerx4TexturePath));
         modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Granite", Constants.ScarGranitex4TexturePath, Constants.ScarGraniteTexturePath));
-        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Pure White", Constants.WhiteTexturePath, Constants.WhiteTexturePath));
+        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Pure White", Constants.WhiteTexturePath, Constants.WhiteTexturePath, true));
 
         var jsonMapping = JsonSerializer.Serialize(modFile, Constants.jsonSerializerOptions);
         File.WriteAllText(diffuseFileName, jsonMapping);
     }
 
-    private static PenumbraModOption MakeDiffuseMappings(HashSet<string> diffusePaths, string name, string x4TexturePath, string texturePath)
+    private static PenumbraModOption MakeDiffuseMappings(HashSet<string> diffusePaths, string name, string x4TexturePath, string texturePath, bool FileSwaps = false)
     {
         var diffuseMaps = diffusePaths.ToDictionary(x => x, x => Constants.X4TextureSubpaths.Any(s => x.Contains(s)) ? x4TexturePath : texturePath);
-        return new PenumbraModOption { Name = name, Files = diffuseMaps };
+        var modOption = new PenumbraModOption{ Name = name };
+        if (FileSwaps)
+        {
+            modOption.FileSwaps = diffuseMaps;
+        } else
+        {
+            modOption.Files = diffuseMaps;
+        }
+        return modOption;
     }
 
     private static MaterialTexturePaths GetStatueTexturesFromMaterialsDirectory(string directoryPath)
