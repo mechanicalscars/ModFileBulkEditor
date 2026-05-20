@@ -5,74 +5,9 @@ namespace ModFileBulkEditor;
 
 public class JSONFileCreator
 {
-    public struct PenumbraMetaFile
-    {
-        public int FileVersion = 3;
-        public string Name = "";
-        public string Author = "";
-        public string Description = "";
-        public string Image = "";
-        public string Version = "";
-        public string Website = "";
-
-        public PenumbraMetaFile() {}
-    }
-
-    public struct PenumbraDefaultSubMod
-    {
-        public int Version = 0; 
-        public Dictionary<string, string>? Files;
-        public Dictionary<string, string>? FileSwaps;
-
-        public PenumbraDefaultSubMod() {}
-    }
-
-    public struct PenumbraModFile
-    {
-        public int Version = 0;
-        public string Name = "";
-        public string Description = "";
-        public string Image = "";
-        public int Page = 0;
-        public int Priority = 0;
-        public string Type = "Single";
-        public int DefaultSettings = 0;
-        public List<PenumbraModOption> Options = [];
-
-        public PenumbraModFile() {}
-    }
-
-    public struct PenumbraModOption
-    {
-        public string Name = "";
-        public string Description = "";
-        public Dictionary<string, string>? Files;
-        public Dictionary<string, string>? FileSwaps;
-
-        public PenumbraModOption() {}
-    }
-
-    private struct MaterialTexturePaths
-    {
-        public HashSet<string> NormalTextures = [];
-        public HashSet<string> DiffuseTextures = [];
-        public HashSet<string> MaskTextures = [];
-        public HashSet<string> IndexTextures = [];
-
-        public MaterialTexturePaths() {}
-
-        public readonly void UnionWith(MaterialTexturePaths paths)
-        {
-            NormalTextures.UnionWith(paths.NormalTextures);
-            DiffuseTextures.UnionWith(paths.DiffuseTextures);
-            MaskTextures.UnionWith(paths.MaskTextures);
-            IndexTextures.UnionWith(paths.IndexTextures);
-        }
-    }
-
     public static void WriteJSONFile<T>(string modPath, string metaFilePath, T metaFile)
     {
-        var metaFullPath = Path.Combine(modPath, metaFilePath); 
+        var metaFullPath = Path.Combine(modPath, metaFilePath);
         var jsonMapping = JsonSerializer.Serialize<T>(metaFile, Constants.jsonSerializerOptions);
         File.WriteAllText(metaFullPath, jsonMapping);
     }
@@ -98,17 +33,17 @@ public class JSONFileCreator
 
         var modOptions = GetOptionsFromDirectory(modPath, childDirectories, additionalMappings);
 
-        var modFile = new PenumbraModFile() { Name = optionDirectory, Type = type, Options = [new PenumbraModOption { Name = "Do Not Install" }] };
+        var modFile = new Models.PenumbraModFile() { Name = optionDirectory, Type = type, Options = [new Models.PenumbraModOption { Name = "Do Not Install" }] };
         modFile.Options.AddRange(modOptions);
-         
-        var jsonMapping = JsonSerializer.Serialize<PenumbraModFile>(modFile, Constants.jsonSerializerOptions);
+
+        var jsonMapping = JsonSerializer.Serialize<Models.PenumbraModFile>(modFile, Constants.jsonSerializerOptions);
         File.WriteAllText(Path.Join(modPath, outputFileName), jsonMapping);
-        
+
     }
 
-    private static List<PenumbraModOption> GetOptionsFromDirectory(string baseModPath, List<string> directories, Dictionary<string, string>? additionalMappings = null)
+    private static List<Models.PenumbraModOption> GetOptionsFromDirectory(string baseModPath, List<string> directories, Dictionary<string, string>? additionalMappings = null)
     {
-        List<PenumbraModOption> modOptions = [];
+        List<Models.PenumbraModOption> modOptions = [];
         foreach (var directory in directories)
         {
             var mappings = GetNaiveMappingsFromDirectory(directory, baseModPath, directory);
@@ -121,20 +56,21 @@ public class JSONFileCreator
                     mappings[overwrite.Key] = newOverWritePath;
                 }
             }
-            modOptions.Add(new PenumbraModOption() { Name = new DirectoryInfo(directory).Name, Files = mappings });
+            modOptions.Add(new Models.PenumbraModOption() { Name = new DirectoryInfo(directory).Name, Files = mappings });
         }
         return modOptions;
     }
 
-    private static Dictionary<string, string> GetNaiveMappingsFromDirectory(string directoryPath, string baseModPath, string optionPath)
+    private static Dictionary<string, string> GetNaiveMappingsFromDirectory(string directoryPath, string baseModPath, string? originalPath = null)
     {
+        originalPath ??= directoryPath;
+
         Dictionary<string, string> mappings = [];
-        var directoryName = Path.GetDirectoryName(directoryPath);
         string[] childDirectories = Directory.GetDirectories(directoryPath);
         string[] childFiles = Directory.GetFiles(directoryPath);
         foreach (string directory in childDirectories)
         {
-            var directoryMappings = GetNaiveMappingsFromDirectory(directory, baseModPath, optionPath);
+            var directoryMappings = GetNaiveMappingsFromDirectory(directory, baseModPath, originalPath);
             foreach (var newMapping in directoryMappings)
             {
                 mappings[newMapping.Key] = newMapping.Value;
@@ -143,82 +79,117 @@ public class JSONFileCreator
         foreach (string file in childFiles)
         {
             var modSubpath = Path.GetRelativePath(baseModPath, file);
-            var optionSubpath = Path.GetRelativePath(optionPath, file);
+            var optionSubpath = Path.GetRelativePath(originalPath, file);
             var ffxivStyleName = optionSubpath.Replace("\\", "/");
             mappings[ffxivStyleName] = modSubpath;
         }
         return mappings;
     }
 
-    /*
-     * Statue Specific (lol because who else is using this, Scar?)
-     * Takes a listings of a directory full of material files, and outputs all their index and mask textures into a dictionary.
-     * Then takes normal and model files and 1:1's them into the same option file.
-     * then takes the diffuses and makes a different group file that has all the different options we're using.
-     */
-    public static void WriteStatueRequiredFiles(string modPath, string materialsDirectory, string normalTextureDirectory, string modelDirectory, string requiredFilesFileName, string diffuseFileName)
+    public static void WriteStatueRequiredFiles(string modPath,
+        string materialsDirectory,
+        List<string>? naiveMappingFolders = null)
     {
         var materialsFullPath = Path.Combine(modPath, materialsDirectory);
-        var requiredFilesFullPath = Path.Combine(modPath, requiredFilesFileName);
-        var diffuseFilesFullPath = Path.Combine(modPath, diffuseFileName);
-        var modelsFullPath = Path.Combine(modPath, modelDirectory);
-        var normalTextureFullPath = Path.Combine(modPath, normalTextureDirectory);
 
         var texturePaths = GetStatueTexturesFromMaterialsDirectory(materialsFullPath);
 
         var indexMappings = texturePaths.IndexTextures.ToDictionary(x => x, x => Constants.WhiteTexturePath);
         var maskMappings = texturePaths.MaskTextures.ToDictionary(x => x, x => Constants.WhiteTexturePath);
+        var indexOptions = new Models.PenumbraModOption() { Name = "Indexs", FileSwaps = indexMappings };
+        var maskOptions = new Models.PenumbraModOption() { Name = "Masks", FileSwaps = maskMappings };
 
-        // Get normalMaps from installed normal folder becuase we don't have a new normal for every material, unlike indexes/diffuses/masks.
-        var modelMappings = GetNaiveMappingsFromDirectory(modelsFullPath, modPath, modelsFullPath);
-        var normalMappings = GetNaiveMappingsFromDirectory(normalTextureFullPath, modPath, normalTextureFullPath);
+        List<Models.PenumbraModOption> options = [indexOptions, maskOptions];
 
-        var indexOptions = new PenumbraModOption() { Name = "Indexs", FileSwaps = indexMappings };
-        var maskOptions = new PenumbraModOption() { Name = "Masks", FileSwaps = maskMappings };
-        var modelOptions = new PenumbraModOption() { Name = "Models", Files = modelMappings };
-        var normalOptions = new PenumbraModOption() { Name = "Normals", Files = normalMappings };
+        if (naiveMappingFolders != null)
+        {
+            foreach (var mappingFolder in naiveMappingFolders)
+            {
+                var mappingFolderFullPath = Path.Combine(modPath, mappingFolder);
 
-        List<PenumbraModOption> options = [indexOptions, maskOptions, modelOptions, normalOptions];
+                var mappings = GetNaiveMappingsFromDirectory(mappingFolderFullPath, modPath);
+
+                options.Add(new Models.PenumbraModOption() { Name = mappingFolder, Files = mappings });
+            }
+        }
+
         // saves default options on and off state as a binary number, so we want them all to be 1;
-        int defaultOptions = (int)(Math.Pow(2,options.Count) - 1);
+        int defaultOptions = (int)(Math.Pow(2, options.Count) - 1);
 
-        var modFile = new PenumbraModFile() { Name = "Requried Materials", Type = "Multi", Options = options, Priority = 0, DefaultSettings = defaultOptions};
+        var modFile = new Models.PenumbraModFile() { Name = Constants.requiredFilesOptionName, Type = "Multi", Options = options, Priority = 0, DefaultSettings = defaultOptions };
         var jsonMapping = JsonSerializer.Serialize(modFile, Constants.jsonSerializerOptions);
+
+        var requiredFilesFullPath = Path.Combine(modPath, Constants.requiredFilesOutputJSONFile);
         File.WriteAllText(requiredFilesFullPath, jsonMapping);
 
-        WriteDiffuseFile(diffuseFilesFullPath, texturePaths.DiffuseTextures);
+        WriteDiffuseFile(modPath, texturePaths.DiffuseTextures);
     }
 
-    private static void WriteDiffuseFile(string diffuseFileName, HashSet<string> diffusePaths)
+    public static void WriteNormalMapsFile(string modPath, string materialsDirectory, string? normalsDirectory = null)
     {
-        var modFile = new PenumbraModFile() { Name = "Base Textures", Type = "Single", Options = [], Priority = 0 };
-        modFile.Options.Add(new PenumbraModOption { Name = "Do Not Install" });
-        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Light Marble", Constants.ScarStonex4TexturePath, Constants.ScarStoneTexturePath));
-        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Dark Marble", Constants.ScarStoneDarkerx4TexturePath, Constants.ScarStoneDarkerx4TexturePath));
-        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Granite", Constants.ScarGranitex4TexturePath, Constants.ScarGraniteTexturePath));
+        List<Models.PenumbraModOption> options = [];
+        int defaultSettings = 0;
+
+        if (normalsDirectory != null)
+        {
+            var normalsFullPath = Path.Combine(modPath, normalsDirectory);
+            // Get the true normalMaps from installed normal folder becuase we don't have a new normal for every material, unlike indexes/diffuses/masks.
+            var normalMappings = GetNaiveMappingsFromDirectory(normalsFullPath, modPath);
+            var normalOptions = new Models.PenumbraModOption() { Name = "Vanilla and Edited Normals", Files = normalMappings, Description = "Massaged normal maps from objects that use skin or hair shaders so they play nicely with the character shader. (Required even if you use the below)" };
+            options.Add(normalOptions);
+            defaultSettings = 1;
+        }
+
+        var materialsFullPath = Path.Combine(modPath, materialsDirectory);
+
+        var texturePaths = GetStatueTexturesFromMaterialsDirectory(materialsFullPath);
+
+        // Ignore hair for Smooth normals cause it does funky stuff.
+        var normalSmoothMappings = texturePaths.NormalTextures.Where(x => !Constants.SmoothIgnoringSubPaths.Any(s => x.Contains(s))).ToDictionary(x => x, x => Constants.SmoothNomalsTexturePath);
+        var normalSmoothOptions = new Models.PenumbraModOption() { Name = "Smooth Normals", Files = normalSmoothMappings, Priority = 1, Description = "For when you want your statues to look a little bit simpler. Hair not included." };
+        options.Add(normalSmoothOptions);
+
+        var modFile = new Models.PenumbraModFile() { Name = Constants.normalMapsOptionName, Type = "Multi", Options = options, Priority = 0, DefaultSettings = defaultSettings };
+        var jsonMapping = JsonSerializer.Serialize(modFile, Constants.jsonSerializerOptions);
+
+        var normalMapFileFullPath = Path.Combine(modPath, Constants.normalMapsOutputJSONFile);
+        File.WriteAllText(normalMapFileFullPath, jsonMapping);
+    }
+
+    private static void WriteDiffuseFile(string modPath, HashSet<string> diffusePaths, bool mainMod = true)
+    {
+        var modFile = new Models.PenumbraModFile() { Name = Constants.baseTexturesOptionName, Type = "Single", Options = [], Priority = 0 };
+        modFile.Options.Add(new Models.PenumbraModOption { Name = "Do Not Install" });
+        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Light Marble", Constants.ScarStonex4TexturePath, Constants.ScarStoneTexturePath, mainMod));
+        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Dark Marble", Constants.ScarStoneDarkerx4TexturePath, Constants.ScarStoneDarkerTexturePath, mainMod));
+        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Granite", Constants.ScarGranitex4TexturePath, Constants.ScarGraniteTexturePath, mainMod));
         modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Pure White", Constants.WhiteTexturePath, Constants.WhiteTexturePath, true));
+        modFile.Options.Add(MakeDiffuseMappings(diffusePaths, "Pure Black", Constants.BlackTexturePath, Constants.BlackTexturePath, true));
 
         var jsonMapping = JsonSerializer.Serialize(modFile, Constants.jsonSerializerOptions);
-        File.WriteAllText(diffuseFileName, jsonMapping);
+        var diffuseFilesFullPath = Path.Combine(modPath, Constants.baseTexturesOutputJSONFile);
+        File.WriteAllText(diffuseFilesFullPath, jsonMapping);
     }
 
-    private static PenumbraModOption MakeDiffuseMappings(HashSet<string> diffusePaths, string name, string x4TexturePath, string texturePath, bool FileSwaps = false)
+    private static Models.PenumbraModOption MakeDiffuseMappings(HashSet<string> diffusePaths, string name, string x4TexturePath, string texturePath, bool fileSwaps = false)
     {
         var diffuseMaps = diffusePaths.ToDictionary(x => x, x => Constants.X4TextureSubpaths.Any(s => x.Contains(s)) ? x4TexturePath : texturePath);
-        var modOption = new PenumbraModOption{ Name = name };
-        if (FileSwaps)
+        var modOption = new Models.PenumbraModOption { Name = name };
+
+        if (fileSwaps)
         {
             modOption.FileSwaps = diffuseMaps;
-        } else
+        }
+        else
         {
             modOption.Files = diffuseMaps;
         }
         return modOption;
     }
 
-    private static MaterialTexturePaths GetStatueTexturesFromMaterialsDirectory(string directoryPath)
+    private static Models.MaterialTexturePaths GetStatueTexturesFromMaterialsDirectory(string directoryPath)
     {
-        MaterialTexturePaths texturePaths = new();
+        Models.MaterialTexturePaths texturePaths = new();
         string[] childDirectories = Directory.GetDirectories(directoryPath);
         string[] childFiles = Directory.GetFiles(directoryPath);
         foreach (string directory in childDirectories)
@@ -237,7 +208,7 @@ public class JSONFileCreator
         return texturePaths;
     }
 
-    private static MaterialTexturePaths GetMaterialTextures(string materialPath)
+    private static Models.MaterialTexturePaths GetMaterialTextures(string materialPath)
     {
         byte[] file = File.ReadAllBytes(materialPath);
         MtrlFile material = new(file);
@@ -247,7 +218,7 @@ public class JSONFileCreator
         var indexPath = Utils.GetSamplerTexturePath(material, ShpkFile.IndexSamplerId);
         var maskPath = Utils.GetSamplerTexturePath(material, ShpkFile.MaskSamplerId);
 
-        return new MaterialTexturePaths()
+        return new Models.MaterialTexturePaths()
         {
             NormalTextures = [normalPath],
             DiffuseTextures = [diffusePath],

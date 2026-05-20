@@ -7,20 +7,28 @@ namespace ModFileBulkEditor;
 
 public static class Constants
 {
-    public static readonly string OutputFolder = "E:\\FFXIVModsDT\\[Scar] Statues Test";
-    //public static readonly string OutputFolder = "E:\\ScarMods\\Statue\\Output";
-    public static readonly string InputFolder = "E:\\ScarMods\\Statues";
+    public static readonly string Version = "1.7";
+    public static readonly string OutputPath = "E:\\FFXIVModsDT\\[Scar] Statues";
+    public static readonly string DollOutputPath = "E:\\FFXIVModsDT\\[Scar] Statues - Dolls";
+    //public static readonly string OutputPath = "E:\\ScarMods\\Statue\\Output";
+    public static readonly string InputPath = "E:\\ScarMods\\Statues";
 
     public static readonly string ModelsFolder = "Model";
     public static readonly string MaterialsFolder = "Material";
     public static readonly string NormalsFolder = "Normal";
-    public static readonly string DollFolder = "Doll Material";
+    public static readonly string DollMaterialFolder = "Doll Material";
+    public static readonly string ScarFolder = "scar";
 
+    public static readonly string materialsOptionName = "Material";
+    public static readonly string baseTexturesOptionName = "Base Textures";
+    public static readonly string normalMapsOptionName = "Normal Maps";
+    public static readonly string requiredFilesOptionName = "Required Materials";
 
-    public static readonly string materialsFilesOutputJSONFile = "group_001_material.json";
-    public static readonly string baseTexturesOutputJSONFile = "group_002_base textures.json";
-    public static readonly string dollFilesOutputJSONFile = "group_003_doll materials.json";
-    public static readonly string requiredFilesOutputJSONFile = "group_004_required materials.json";
+    public static readonly string materialsFilesOutputJSONFile = $"group_001_{materialsOptionName}.json";
+    public static readonly string baseTexturesOutputJSONFile = $"group_002_{baseTexturesOptionName}.json";
+    public static readonly string normalMapsOutputJSONFile = $"group_003_{normalMapsOptionName}.json";
+    public static readonly string requiredFilesOutputJSONFile = $"group_004_{requiredFilesOptionName}.json";
+
     public static readonly string metaOutputJSONFile = "meta.json";
     public static readonly string defaultOutputJSONFile = "default_mod.json";
 
@@ -28,9 +36,7 @@ public static class Constants
     public static readonly string GoldFolder = "Gold";
     public static readonly string StoneMarbleFolder = "Stone (Marble)";
     public static readonly string StoneMatteFolder = "Stone (Matte)";
-    public static readonly string LatexBlackFolder = "Latex (Black)";
-
-    public static readonly string ScarFolder = "scar";
+    public static readonly string LatexFolder = "Latex";
 
     public static readonly string ScarStoneTexturePath = "scar\\texture\\stone_lighter.tex";
     public static readonly string ScarStonex4TexturePath = "scar\\texture\\stone_lighter_x4.tex";
@@ -38,11 +44,14 @@ public static class Constants
     public static readonly string ScarStoneDarkerx4TexturePath = "scar\\texture\\stone_darker_x4.tex";
     public static readonly string ScarGraniteTexturePath = "scar\\texture\\granite.tex";
     public static readonly string ScarGranitex4TexturePath = "scar\\texture\\granite_x4.tex";
+    public static readonly string SmoothNomalsTexturePath = "scar\\texture\\smooth_normal.tex";
 
     public static readonly string WhiteTexturePath = "chara\\common\\texture\\white.tex";
+    public static readonly string BlackTexturePath = "chara\\common\\texture\\black.tex";
 
     public static readonly string[] X4TextureSubpaths = ["_fac_a", "hir_a", "_etc_", "_acc_"];
     public static readonly string[] AccentMaterialSubpaths = ["_etc_", "_acc_", "_fac_b"];
+    public static readonly string[] SmoothIgnoringSubPaths = ["_etc_", "_hir_"];
 
     public static readonly HalfColor goldHalfColor = Utils.getHalfColorFromRGB(245, 200, 65);
     public static readonly HalfColor goldDarkerHalfColour = Utils.getHalfColorFromRGB(110, 86, 38);
@@ -189,9 +198,10 @@ public static class Constants
         {"chara/human/c1801/obj/body/b0001/material/v0001/mt_c1801b0001_doll.mtrl", "chara\\human\\c1601\\obj\\body\\b0001\\material\\v0001\\mt_c1601b0001_DOLL.mtrl"},
     };
 
-    public static readonly string StatueModDescription = "Statues for All! Now With DOLL2/AB/Gen3 Support!\n" +
+    public static readonly string StatueModDescription = "Statues for All!\n" +
         "Minor Bug:\n" +
         "If you run into shadows (example: Vanilla Small Clothes or Galatea Bustier), \n" +
         "that is unfortunately a side effect of swapping the shaders from skin to character. \n" +
-        "To fix that, you will have to remove the vertex colours on the 3D model on a case by case basis. Might be better just to find an upscale somewhere, apologies.";
+        "To fix that, you will have to remove the vertex colours on the 3D model on a case by case basis. Might be better just to find an upscale somewhere, apologies.\n" +
+        "In addition, face paints do not play nicely with the character shader, so please remove them and your vanilla facial tattoos (other facial features should still work though).";
 }

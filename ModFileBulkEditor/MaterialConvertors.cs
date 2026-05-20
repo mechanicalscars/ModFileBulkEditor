@@ -94,7 +94,7 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialBlack(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialLatex(FileInfo inputFile, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -104,7 +104,7 @@ public class MaterialConvertors
         if (Table is ColorTable table)
         {
 
-            table[30].DiffuseColor = Constants.blackHalfColor;
+            table[30].DiffuseColor = Constants.whiteHalfColor;
             table[30].SpecularColor = Constants.whiteHalfColor;
             table[30].Roughness = (Half)0.00;
             table[30].Metalness = (Half)0.50;
