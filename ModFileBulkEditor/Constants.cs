@@ -8,9 +8,9 @@ namespace ModFileBulkEditor;
 public static class Constants
 {
     public static readonly string Version = "1.7";
+
     public static readonly string OutputPath = "E:\\FFXIVModsDT\\[Scar] Statues";
     public static readonly string DollOutputPath = "E:\\FFXIVModsDT\\[Scar] Statues - Dolls";
-    //public static readonly string OutputPath = "E:\\ScarMods\\Statue\\Output";
     public static readonly string InputPath = "E:\\ScarMods\\Statues";
 
     public static readonly string ModelsFolder = "Model";
@@ -23,11 +23,6 @@ public static class Constants
     public static readonly string baseTexturesOptionName = "Base Textures";
     public static readonly string normalMapsOptionName = "Normal Maps";
     public static readonly string requiredFilesOptionName = "Required Materials";
-
-    public static readonly string materialsFilesOutputJSONFile = $"group_001_{materialsOptionName}.json";
-    public static readonly string baseTexturesOutputJSONFile = $"group_002_{baseTexturesOptionName}.json";
-    public static readonly string normalMapsOutputJSONFile = $"group_003_{normalMapsOptionName}.json";
-    public static readonly string requiredFilesOutputJSONFile = $"group_004_{requiredFilesOptionName}.json";
 
     public static readonly string metaOutputJSONFile = "meta.json";
     public static readonly string defaultOutputJSONFile = "default_mod.json";
@@ -52,6 +47,11 @@ public static class Constants
     public static readonly string[] X4TextureSubpaths = ["_fac_a", "hir_a", "_etc_", "_acc_"];
     public static readonly string[] AccentMaterialSubpaths = ["_etc_", "_acc_", "_fac_b"];
     public static readonly string[] SmoothIgnoringSubPaths = ["_etc_", "_hir_"];
+
+    public static readonly Dictionary<string, List<string>> alternativePartsSplits = new(){
+    {"Face", ["/face/"] },
+    {"Hair/Tails/Ears", ["/tail/", "/hair/", "/zear/"] }
+    };
 
     public static readonly HalfColor goldHalfColor = Utils.getHalfColorFromRGB(245, 200, 65);
     public static readonly HalfColor goldDarkerHalfColour = Utils.getHalfColorFromRGB(110, 86, 38);
@@ -183,8 +183,6 @@ public static class Constants
         { "chara/human/c1601/obj/face/f0007/material/mt_c1601f0007_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0107\\material\\mt_c1601f0107_fac_a.mtrl" },
         { "chara/human/c1601/obj/face/f0008/material/mt_c1601f0008_fac_a.mtrl", "chara\\human\\c1601\\obj\\face\\f0108\\material\\mt_c1601f0108_fac_a.mtrl" },
         { "chara/human/c1601/obj/face/f0108/material/mt_c1601f0108_fac_b.mtrl", "chara\\human\\c1601\\obj\\face\\f0008\\material\\mt_c1601f0008_fac_b.mtrl" },
-
-        
      };
 
     public static readonly Dictionary<string, string> additionalDollMappings = new() {

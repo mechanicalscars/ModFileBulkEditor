@@ -10,12 +10,10 @@ public class ModFileBulkEditorMain
         (Constants.LatexFolder, MaterialConvertors.turnMaterialLatex, null),
     ];
 
-
     public static void Main(string[] args)
     {
         var metaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues", Author = "Scar", Description = Constants.StatueModDescription, Version = Constants.Version };
-        CreateMod(Constants.InputPath, Constants.OutputPath, Constants.MaterialsFolder, metaFile, [Constants.NormalsFolder, Constants.ModelsFolder, Constants.ScarFolder], [Constants.ModelsFolder], Constants.NormalsFolder, Constants.additionalMaterialMappings);
-
+        CreateMod(Constants.InputPath, Constants.OutputPath, Constants.MaterialsFolder, metaFile, [Constants.NormalsFolder, Constants.ModelsFolder, Constants.ScarFolder], [Constants.ModelsFolder], Constants.NormalsFolder, Constants.additionalMaterialMappings, true);
 
         var dollMetaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues - Doll Addon", Author = "Scar", Version = Constants.Version };
         CreateMod(Constants.InputPath, Constants.DollOutputPath, Constants.DollMaterialFolder, dollMetaFile, [Constants.ScarFolder], null, null, Constants.additionalDollMappings);
@@ -29,7 +27,8 @@ public class ModFileBulkEditorMain
         List<string> copyFolders,
         List<string>? naiveMappingFolders = null,
         string? normalMapsFolderName = null,
-        Dictionary<string, string>? additionalMaterialMappings = null
+        Dictionary<string, string>? additionalMaterialMappings = null,
+        bool splitHairAndFaceOptions = false
         )
     {
         var materialInputPath = Path.Combine(inputPath, materialsFolderName);
@@ -48,12 +47,14 @@ public class ModFileBulkEditorMain
             CopyDirectory(copyInputPath, copyOutputPath);
         }
 
-        JSONFileCreator.WriteJSONFile(outputPath, Constants.metaOutputJSONFile, metaFile);
-        JSONFileCreator.WriteJSONFile(outputPath, Constants.defaultOutputJSONFile, new Models.PenumbraDefaultSubMod() { });
-        JSONFileCreator.WriteFileRedirectionsToJSONFile(outputPath, materialsFolderName, Constants.materialsFilesOutputJSONFile, additionalMaterialMappings);
+        JSONFileCreator fileCreator = new(outputPath,splitHairAndFaceOptions);
 
-        JSONFileCreator.WriteStatueRequiredFiles(outputPath, materialsFolderName, naiveMappingFolders);
-        JSONFileCreator.WriteNormalMapsFile(outputPath, materialsFolderName, normalMapsFolderName);
+        fileCreator.WriteJSONFile(Constants.metaOutputJSONFile, metaFile, false);
+        fileCreator.WriteJSONFile(Constants.defaultOutputJSONFile, new Models.PenumbraDefaultSubMod() { }, false);
+
+        fileCreator.WriteFileRedirectionsToJSONFile(materialsFolderName, additionalMaterialMappings);
+        fileCreator.WriteStatueRequiredFiles(materialsFolderName, naiveMappingFolders);
+        fileCreator.WriteNormalMapsFile(materialsFolderName, normalMapsFolderName);
     }
 
     private static void ConvertDirectory(string folderPath, string newDirectoryPath, MaterialConvertor? materialConvertor = null, TextureConvertor? textureConvertor = null)
