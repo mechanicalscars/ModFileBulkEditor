@@ -1,5 +1,4 @@
-﻿namespace ModFileBulkEditor;
-internal class Models
+﻿namespace ModFileBulkEditor.Models
 {
     public struct PenumbraMetaFile
     {

@@ -20,9 +20,9 @@ public static class Constants
     public static readonly string ScarFolder = "scar";
 
     public static readonly string materialsOptionName = "Material";
-    public static readonly string baseTexturesOptionName = "Base Textures";
+    public static readonly string baseTexturesOptionName = "Textures";
     public static readonly string normalMapsOptionName = "Normal Maps";
-    public static readonly string requiredFilesOptionName = "Required Materials";
+    public static readonly string requiredFilesOptionName = "Files";
 
     public static readonly string metaOutputJSONFile = "meta.json";
     public static readonly string defaultOutputJSONFile = "default_mod.json";
@@ -50,8 +50,29 @@ public static class Constants
 
     public static readonly Dictionary<string, List<string>> alternativePartsSplits = new(){
     {"Face", ["/face/"] },
-    {"Hair/Tails/Ears", ["/tail/", "/hair/", "/zear/"] }
+    {"Hair Tails & Ears", ["/tail/", "/hair/", "/zear/"] }
     };
+
+    public static readonly string diffuseMarbleName = "Light Marble";
+    public static readonly string diffuseDarkMarbleName = "Dark Marble";
+    public static readonly string diffuseGraniteName = "Granite";
+    public static readonly string diffuseWhiteName = "Pure White";
+    public static readonly string diffuseBlackName = "Pure Black";
+
+    public static readonly List<(string, string, string)> diffuseMappings = [
+    (diffuseMarbleName, ScarStonex4TexturePath, ScarStoneTexturePath),
+        (diffuseDarkMarbleName, ScarStoneDarkerx4TexturePath, ScarStoneDarkerTexturePath),
+        (diffuseGraniteName, ScarGranitex4TexturePath, ScarGraniteTexturePath),
+        (diffuseWhiteName, WhiteTexturePath, WhiteTexturePath),
+        (diffuseBlackName, BlackTexturePath, BlackTexturePath)
+    ];
+
+    public static readonly string vanillaNormalsOptionName = "Vanilla and Edited Normals";
+    public static readonly string smoothNormalsOptionName = "Smooth Normals";
+    public static readonly string indexOptionsName = "Index";
+    public static readonly string masksOptionsName = "Masks";
+
+    public static readonly List<string> fileSwapOptionNames = [diffuseWhiteName, diffuseBlackName, indexOptionsName, masksOptionsName];
 
     public static readonly HalfColor goldHalfColor = Utils.getHalfColorFromRGB(245, 200, 65);
     public static readonly HalfColor goldDarkerHalfColour = Utils.getHalfColorFromRGB(110, 86, 38);

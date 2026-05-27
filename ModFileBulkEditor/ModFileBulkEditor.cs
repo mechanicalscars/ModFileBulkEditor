@@ -53,8 +53,7 @@ public class ModFileBulkEditorMain
         fileCreator.WriteJSONFile(Constants.defaultOutputJSONFile, new Models.PenumbraDefaultSubMod() { }, false);
 
         fileCreator.WriteFileRedirectionsToJSONFile(materialsFolderName, additionalMaterialMappings);
-        fileCreator.WriteStatueRequiredFiles(materialsFolderName, naiveMappingFolders);
-        fileCreator.WriteNormalMapsFile(materialsFolderName, normalMapsFolderName);
+        fileCreator.WriteStatueRequiredFiles(materialsFolderName, normalMapsFolderName, naiveMappingFolders);
     }
 
     private static void ConvertDirectory(string folderPath, string newDirectoryPath, MaterialConvertor? materialConvertor = null, TextureConvertor? textureConvertor = null)
