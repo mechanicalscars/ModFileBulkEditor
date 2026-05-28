@@ -19,10 +19,9 @@ public static class Constants
     public static readonly string DollMaterialFolder = "Doll Material";
     public static readonly string ScarFolder = "scar";
 
-    public static readonly string materialsOptionName = "Material";
-    public static readonly string baseTexturesOptionName = "Textures";
-    public static readonly string normalMapsOptionName = "Normal Maps";
-    public static readonly string requiredFilesOptionName = "Files";
+    public static readonly string materialGroupName = "Material";
+    public static readonly string baseTexturesGroupName = "Textures";
+    public static readonly string requiredFilesGroupName = "Files";
 
     public static readonly string metaOutputJSONFile = "meta.json";
     public static readonly string defaultOutputJSONFile = "default_mod.json";
@@ -44,12 +43,13 @@ public static class Constants
     public static readonly string WhiteTexturePath = "chara\\common\\texture\\white.tex";
     public static readonly string BlackTexturePath = "chara\\common\\texture\\black.tex";
 
-    public static readonly string[] X4TextureSubpaths = ["_fac_a", "hir_a", "_etc_", "_acc_"];
+    public static readonly string[] X4TextureSubpaths = ["_fac_base", "hir_a", "_etc_", "_acc_"];
     public static readonly string[] AccentMaterialSubpaths = ["_etc_", "_acc_", "_fac_b"];
-    public static readonly string[] SmoothIgnoringSubPaths = ["_etc_", "_hir_"];
+    public static readonly string[] SmoothIgnoringSubPaths = ["/hair/", "/tail/", "/zear/", "/face/"];
 
-    public static readonly Dictionary<string, List<string>> alternativePartsSplits = new(){
+    public static readonly Dictionary<string, List<string>> alternativePartsSplits = new() {
     {"Face", ["/face/"] },
+    {"Body", ["/body/", "chara/bibo_"] },
     {"Hair Tails & Ears", ["/tail/", "/hair/", "/zear/"] }
     };
 
@@ -67,12 +67,13 @@ public static class Constants
         (diffuseBlackName, BlackTexturePath, BlackTexturePath)
     ];
 
-    public static readonly string vanillaNormalsOptionName = "Vanilla and Edited Normals";
+    public static readonly string vanillaNormalsOptionName = "Massaged Normals";
     public static readonly string smoothNormalsOptionName = "Smooth Normals";
-    public static readonly string indexOptionsName = "Index";
-    public static readonly string masksOptionsName = "Masks";
+    public static readonly string indexOptionName = "Index";
+    public static readonly string maskOptionsName = "Masks";
+    public static readonly string requiredFilesOptionName = "Required Files";
 
-    public static readonly List<string> fileSwapOptionNames = [diffuseWhiteName, diffuseBlackName, indexOptionsName, masksOptionsName];
+    public static readonly List<string> fileSwapOptionNames = [diffuseWhiteName, diffuseBlackName, indexOptionName, maskOptionsName];
 
     public static readonly HalfColor goldHalfColor = Utils.getHalfColorFromRGB(245, 200, 65);
     public static readonly HalfColor goldDarkerHalfColour = Utils.getHalfColorFromRGB(110, 86, 38);
@@ -223,4 +224,6 @@ public static class Constants
         "that is unfortunately a side effect of swapping the shaders from skin to character. \n" +
         "To fix that, you will have to remove the vertex colours on the 3D model on a case by case basis. Might be better just to find an upscale somewhere, apologies.\n" +
         "In addition, face paints do not play nicely with the character shader, so please remove them and your vanilla facial tattoos (other facial features should still work though).";
+
+    public static readonly string SmoothNormalsDescription = "For when you want your statues to have less texture. Hair not included.";
 }

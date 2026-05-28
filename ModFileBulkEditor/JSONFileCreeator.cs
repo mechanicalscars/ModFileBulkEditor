@@ -49,10 +49,7 @@ public class JSONFileCreator
 
         var modOptions = GetOptionsFromDirectory(childDirectories, additionalMappings);
 
-        var modFile = new PenumbraModFile() { Name = optionDirectory, Type = "Single", Options = [new PenumbraModOption { Name = "Do Not Install" }] };
-        modFile.Options.AddRange(modOptions);
-
-        WriteJSONFile(optionDirectory, modFile);
+        WriteMappingsToFiles(optionDirectory, modOptions, true);
     }
 
     private List<PenumbraModOption> GetOptionsFromDirectory(List<string> directories, Dictionary<string, string>? additionalMappings = null)
@@ -60,7 +57,7 @@ public class JSONFileCreator
         List<PenumbraModOption> modOptions = [];
         foreach (var directory in directories)
         {
-            var mappings = GetNaiveMappingsFromDirectory(directory, directory);
+            var mappings = GetNaiveMappingsFromDirectory(directory);
             if (additionalMappings != null)
             {
                 var optionSubpath = Path.GetRelativePath(modPath, directory);
@@ -102,15 +99,16 @@ public class JSONFileCreator
 
     public void WriteStatueRequiredFiles(string materialsDirectory,
         string? normalsDirectory = null,
-        List<string>? naiveMappingFolders = null)
+        List<string>? naiveMappingFolders = null,
+        bool mergeRequiredFiles = true)
     {
         var materialsFullPath = Path.Combine(modPath, materialsDirectory);
 
         var texturePaths = GetStatueTexturesFromMaterialsDirectory(materialsFullPath);
 
         List<PenumbraModOption> modOptions = [
-           new PenumbraModOption() {Name = Constants.indexOptionsName, FileSwaps = texturePaths.IndexTextures.ToDictionary(x => x, x => Constants.WhiteTexturePath) },
-           new PenumbraModOption() {Name = Constants.masksOptionsName, FileSwaps = texturePaths.MaskTextures.ToDictionary(x => x, x => Constants.WhiteTexturePath) }
+           new PenumbraModOption() {Name = Constants.indexOptionName, FileSwaps = texturePaths.IndexTextures.ToDictionary(x => x, x => Constants.WhiteTexturePath) },
+           new PenumbraModOption() {Name = Constants.maskOptionsName, FileSwaps = texturePaths.MaskTextures.ToDictionary(x => x, x => Constants.WhiteTexturePath) }
         ];
 
         if (naiveMappingFolders != null)
@@ -119,16 +117,34 @@ public class JSONFileCreator
             {
                 var mappingFolderFullPath = Path.Combine(modPath, mappingFolder);
 
-                var directoryMappings = GetNaiveMappingsFromDirectory(mappingFolderFullPath, modPath);
+                var directoryMappings = GetNaiveMappingsFromDirectory(mappingFolderFullPath);
                 modOptions.Add(new PenumbraModOption() { Name = mappingFolder, Files = directoryMappings });
 
             }
         }
 
         var normalMappings = GetNormalMappings(materialsDirectory, normalsDirectory);
-        modOptions.AddRange(normalMappings);
 
-        WriteMappingsToFiles(Constants.requiredFilesOptionName, modOptions);
+        if (mergeRequiredFiles)
+        {
+            var mergedRequiredFiles = new PenumbraModOption { Name = Constants.requiredFilesOptionName };
+            foreach (var modOption in modOptions)
+            {
+                mergedRequiredFiles.Add(modOption);
+            }
+
+            if (normalsDirectory != null)
+            {
+                mergedRequiredFiles.Add(normalMappings[0]);
+                normalMappings.RemoveAt(0);
+            }
+            modOptions = [mergedRequiredFiles];
+        }
+
+        modOptions.AddRange(normalMappings);
+        
+
+        WriteMappingsToFiles(Constants.requiredFilesGroupName, modOptions);
 
         WriteDiffuseFile(texturePaths.DiffuseTextures);
     }
@@ -149,7 +165,7 @@ public class JSONFileCreator
             }
             modOptions.Add(modOption);
         }
-        WriteMappingsToFiles(Constants.baseTexturesOptionName, modOptions, true);
+        WriteMappingsToFiles(Constants.baseTexturesGroupName, modOptions, true);
 
     }
 
@@ -188,7 +204,7 @@ public class JSONFileCreator
         List<PenumbraModOption> newModOptions = [];
         foreach(var modOption in modOptions)
         {
-            if(modOption.Files?.Count > 0 || modOption.FileSwaps?.Count > 0)
+            if(modOption.Files.Count > 0 || modOption.FileSwaps.Count > 0)
             {
                 newModOptions.Add(modOption);
             }
@@ -199,15 +215,20 @@ public class JSONFileCreator
     // Note: This is naive and activates Smooth Normals; figure out a way to arbitrarily turn off specific things if multi, or target specific default options for single.
     private void WriteMappingsToFileAsOptions(string fileName, List<PenumbraModOption> modOptions, bool single = false) 
     {
+        if (modOptions.Count == 0) { return; }
+
         List<PenumbraModOption> options = [];
+        
         if(single)
         {
             options.Add(new PenumbraModOption { Name = "Do Not Install" });
         }
+        
         options.AddRange(modOptions);
 
         var type = "Single";
-        int defaultOptions = 0;
+        int defaultOptions = 1;
+
         if (!single)
         {
             type = "Multi";
@@ -221,18 +242,18 @@ public class JSONFileCreator
     
     private static (PenumbraModOption, PenumbraModOption?) SplitMappingByRegexInKey(PenumbraModOption originalModFile, List<string> pathsToSearch)
     {
-        var falseFileMappings = originalModFile.Files?.Where(x => !pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
-        var falseFileSwapMappings = originalModFile.FileSwaps?.Where(x => !pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
+        var falseFileMappings = originalModFile.Files.Where(x => !pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
+        var falseFileSwapMappings = originalModFile.FileSwaps.Where(x => !pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
 
-        var trueFileMappings = originalModFile.Files?.Where(x => pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
-        var trueFileSwapMappings = originalModFile.FileSwaps?.Where(x => pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
+        var trueFileMappings = originalModFile.Files.Where(x => pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
+        var trueFileSwapMappings = originalModFile.FileSwaps.Where(x => pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
 
         originalModFile.Files = falseFileMappings;
         originalModFile.FileSwaps = falseFileSwapMappings;
         PenumbraModOption? splitModFile = null;
-        if(trueFileMappings?.Count > 0 || trueFileSwapMappings?.Count > 0)
+        if(trueFileMappings.Count > 0 || trueFileSwapMappings.Count > 0)
         {
-            splitModFile = new() { Name = originalModFile.Name, Files = trueFileMappings, FileSwaps = trueFileSwapMappings };
+            splitModFile = new PenumbraModOption() { Name = originalModFile.Name, Files = trueFileMappings, FileSwaps = trueFileSwapMappings, Description = originalModFile.Description };
         }
         return (originalModFile, splitModFile); 
     }
@@ -244,7 +265,7 @@ public class JSONFileCreator
         {
             var normalsFullPath = Path.Combine(modPath, normalsDirectory);
             // Get the true normalMaps from installed normal folder becuase we don't have a new normal for every material, unlike indexes/diffuses/masks.
-            var normalMappings = GetNaiveMappingsFromDirectory(normalsFullPath, modPath);
+            var normalMappings = GetNaiveMappingsFromDirectory(normalsFullPath);
 
             modOptions.Add(new PenumbraModOption() { Name = Constants.vanillaNormalsOptionName, Files = normalMappings });
         }
@@ -256,7 +277,7 @@ public class JSONFileCreator
         // Ignore hair for Smooth normals cause it does funky stuff.
         var normalSmoothMappings = texturePaths.NormalTextures.Where(x => !Constants.SmoothIgnoringSubPaths.Any(s => x.Contains(s))).ToDictionary(x => x, x => Constants.SmoothNomalsTexturePath);
 
-        modOptions.Add(new PenumbraModOption() { Name = Constants.smoothNormalsOptionName, Files = normalSmoothMappings });
+        modOptions.Add(new PenumbraModOption() { Name = Constants.smoothNormalsOptionName, Files = normalSmoothMappings, Description= Constants.SmoothNormalsDescription, Priority = 1 });
 
         return modOptions;
     }

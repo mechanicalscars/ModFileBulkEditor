@@ -41,11 +41,24 @@
     {
         public string Name = "";
         public string Description = "";
-        public Dictionary<string, string>? Files;
-        public Dictionary<string, string>? FileSwaps;
+        public Dictionary<string, string> Files = [];
+        public Dictionary<string, string> FileSwaps = [];
         public int? Priority;
 
         public PenumbraModOption() { }
+
+        public readonly void Add(PenumbraModOption otherOption)
+        {
+            foreach ((var key, var value) in otherOption.Files)
+            {
+                Files[key] = value; 
+            }
+
+            foreach ((var key, var value) in otherOption.FileSwaps)
+            {
+                FileSwaps[key] = value;
+            }
+        }
     }
 
     public struct MaterialTexturePaths
