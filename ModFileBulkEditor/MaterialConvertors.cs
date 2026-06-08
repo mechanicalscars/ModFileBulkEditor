@@ -1,5 +1,6 @@
 using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.MaterialStructs;
+using Penumbra.GameData.Structs;
 
 namespace ModFileBulkEditor;
 
@@ -94,7 +95,12 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialLatex(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialWhiteLatex(FileInfo inputFile, string outputFilePath)
+    {
+        turnMaterialLatexInternal(inputFile, outputFilePath, Constants.whiteHalfColor, Constants.whiteHalfColor);
+    }
+
+    private static void turnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, HalfColor diffuseColor, HalfColor specularColor)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -104,8 +110,8 @@ public class MaterialConvertors
         if (Table is ColorTable table)
         {
 
-            table[30].DiffuseColor = Constants.whiteHalfColor;
-            table[30].SpecularColor = Constants.whiteHalfColor;
+            table[30].DiffuseColor = diffuseColor;
+            table[30].SpecularColor = specularColor;
             table[30].Roughness = (Half)0.00;
             table[30].Metalness = (Half)0.50;
             table[30].SheenRate = (Half)1.0;
@@ -116,7 +122,6 @@ public class MaterialConvertors
 
         File.WriteAllBytes(outputFilePath, material.Write());
     }
-
 
     private static MtrlFile MetaDataConversion(MtrlFile material)
     {

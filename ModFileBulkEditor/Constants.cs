@@ -11,6 +11,7 @@ public static class Constants
 
     public static readonly string OutputPath = "E:\\FFXIVModsDT\\[Scar] Statues";
     public static readonly string DollOutputPath = "E:\\FFXIVModsDT\\[Scar] Statues - Dolls";
+    public static readonly string IceOutputPath = "E:\\FFXIVModsDT\\[Scar] Statues - Ice";
     public static readonly string InputPath = "E:\\ScarMods\\Statues";
 
     public static readonly string ModelsFolder = "Model";
@@ -45,12 +46,13 @@ public static class Constants
 
     public static readonly string[] X4TextureSubpaths = ["_fac_base", "hir_a", "_etc_", "_acc_"];
     public static readonly string[] AccentMaterialSubpaths = ["_etc_", "_acc_", "_fac_b"];
-    public static readonly string[] SmoothIgnoringSubPaths = ["/hair/", "/tail/", "/zear/", "/face/"];
+    public static readonly string[] SmoothIgnoringSubPaths = ["/hair/", "/tail/", "/zear/", "/face/", "/eye/"];
 
     public static readonly Dictionary<string, List<string>> alternativePartsSplits = new() {
-    {"Face", ["/face/"] },
-    {"Body", ["/body/", "chara/bibo_"] },
-    {"Hair Tails & Ears", ["/tail/", "/hair/", "/zear/"] }
+        {"Eyes", ["_iri_", "/eye/", "fac.mdl"] },
+        {"Face", ["/face/"] },
+        {"Body", ["/body/", "chara/bibo_"] },
+        {"Hair, Tails, & Ears", ["/tail/", "/hair/", "/zear/"] }
     };
 
     public static readonly string diffuseMarbleName = "Light Marble";
