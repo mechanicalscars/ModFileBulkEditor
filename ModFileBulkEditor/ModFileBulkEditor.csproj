@@ -1,25 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 	<ItemGroup>
+		<Reference Include="DirectXTexC">
+			<HintPath>$(AppData)\XIVLauncher\installedPlugins\Penumbra\1.6.1.10\DirectXTexC.dll</HintPath>
+		</Reference>
+		<Reference Include="OtterTex">
+			<HintPath>$(AppData)\XIVLauncher\installedPlugins\Penumbra\1.6.1.10\OtterTex.dll</HintPath>
+		</Reference>
 		<Reference Include="Penumbra.GameData">
 			<HintPath>$(AppData)\XIVLauncher\installedPlugins\Penumbra\1.6.1.10\Penumbra.GameData.dll</HintPath>
 		</Reference>
-	</ItemGroup>
-	<ItemGroup>
 		<Reference Include="Penumbra">
 			<HintPath>$(AppData)\XIVLauncher\installedPlugins\Penumbra\1.6.1.10\Penumbra.dll</HintPath>
 		</Reference>
-	</ItemGroup>
-	<ItemGroup>
+		<Reference Include="Luna">
+			<HintPath>$(AppData)\XIVLauncher\installedPlugins\Penumbra\1.6.1.10\Luna.dll</HintPath>
+		</Reference>
 		<Reference Include="Lumina">
 			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
 		</Reference>
 	</ItemGroup>
-	
 </Project>
