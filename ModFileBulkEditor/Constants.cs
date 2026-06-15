@@ -7,7 +7,7 @@ namespace ModFileBulkEditor;
 
 public static class Constants
 {
-    public static readonly string Version = "1.7";
+    public static readonly string Version = "1.9";
 
     public static readonly string OutputPath = "E:\\FFXIVModsDT\\[Scar] Statues";
     public static readonly string DollOutputPath = "E:\\FFXIVModsDT\\[Scar] Statues - Dolls";
@@ -19,6 +19,7 @@ public static class Constants
     public static readonly string NormalsFolder = "Normal";
     public static readonly string DollMaterialFolder = "Doll Material";
     public static readonly string ScarFolder = "scar";
+    public static readonly string AdditionalNormalsFolder = "Normals - See Through Addon";
 
     public static readonly string materialGroupName = "Material";
     public static readonly string baseTexturesGroupName = "Textures";
@@ -32,6 +33,7 @@ public static class Constants
     public static readonly string StoneMarbleFolder = "Stone (Marble)";
     public static readonly string StoneMatteFolder = "Stone (Matte)";
     public static readonly string LatexFolder = "Latex";
+    public static readonly string LatexDyeableFolder = "Latex (Dyeable)";
 
     public static readonly string ScarStoneTexturePath = "scar\\texture\\stone_lighter.tex";
     public static readonly string ScarStonex4TexturePath = "scar\\texture\\stone_lighter_x4.tex";
@@ -52,7 +54,8 @@ public static class Constants
         {"Eyes", ["_iri_", "/eye/", "fac.mdl"] },
         {"Face", ["/face/"] },
         {"Body", ["/body/", "chara/bibo_"] },
-        {"Hair, Tails, & Ears", ["/tail/", "/hair/", "/zear/"] }
+        {"Hair & Ears", ["/hair/", "/zear/"] },
+        {"Tails", ["/tail/"] }
     };
 
     public static readonly string diffuseMarbleName = "Light Marble";
@@ -218,6 +221,16 @@ public static class Constants
         {"chara/human/c1601/obj/body/b0001/material/v0004/mt_c1601b0001_doll.mtrl", "chara\\human\\c1601\\obj\\body\\b0001\\material\\v0001\\mt_c1601b0001_DOLL.mtrl"},
         {"chara/human/c1601/obj/body/b0001/material/v0005/mt_c1601b0001_doll.mtrl", "chara\\human\\c1601\\obj\\body\\b0001\\material\\v0001\\mt_c1601b0001_DOLL.mtrl"},
         {"chara/human/c1801/obj/body/b0001/material/v0001/mt_c1801b0001_doll.mtrl", "chara\\human\\c1601\\obj\\body\\b0001\\material\\v0001\\mt_c1601b0001_DOLL.mtrl"},
+    };
+
+    public static readonly Dictionary<string, string> additionalNormalIceMappings = new() {
+        {"chara/bibo_xaela_norm.tex", "chara\\bibo_raen_norm.tex"},
+        {"chara/bibo_mid_norm.tex", "chara\\bibo_high_norm.tex"},
+        {"chara/bibo_viera_norm.tex", "chara\\bibo_high_norm.tex"},
+        {"chara/human/c0201/obj/body/b0001/texture//c0201b0001_norm.tex", "chara\\human\\c0401\\obj\\body\\b0001\\texture\\c0401b0001_norm.tex"},
+        {"chara/human/c1801/obj/body/b0001/texture//c1801b0001_norm.tex", "chara\\human\\c0401\\obj\\body\\b0001\\texture\\c0401b0001_norm.tex"},
+        {"chara/human/c0801/obj/body/b0001/texture//c0801b0001_norm.tex", "chara\\human\\c0401\\obj\\body\\b0001\\texture\\c0401b0001_norm.tex"},
+        //{"chara/human/c0201/obj/body/b0001/texture//c0201b0001_norm.tex", "chara\\human\\c0401\\obj\\body\\b0001\\texture\\c0401b0001_norm.tex"},
     };
 
     public static readonly string StatueModDescription = "Statues for All!\n" +

@@ -10,18 +10,20 @@ public class ModFileBulkEditorMain
         (Constants.GoldFolder, MaterialConvertors.turnMaterialGold, null),
         (Constants.JadeFolder, MaterialConvertors.turnMaterialJade, null),
         (Constants.LatexFolder, MaterialConvertors.turnMaterialWhiteLatex, null),
+        (Constants.LatexDyeableFolder, MaterialConvertors.turnMaterialWhiteDyeableLatex, null),
     ];
 
     private static readonly List<(string, MaterialConvertor?, TextureConvertor?)> SeeThroughFolders = [
+        (Constants.LatexDyeableFolder, MaterialConvertors.turnMaterialWhiteDyeableLatex, null)
     ];
 
     public static void Main(string[] args)
     {
-        var metaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues", Author = "Scar", Description = Constants.StatueModDescription, Version = Constants.Version };
-        CreateMod(Constants.InputPath, Constants.OutputPath, Constants.MaterialsFolder, metaFile, [Constants.NormalsFolder, Constants.ModelsFolder, Constants.ScarFolder], [Constants.ModelsFolder], Constants.NormalsFolder, Constants.additionalMaterialMappings);
+        //var metaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues", Author = "Scar", Description = Constants.StatueModDescription, Version = Constants.Version };
+        //CreateMod(Constants.InputPath, Constants.OutputPath, Constants.MaterialsFolder, metaFile, [Constants.NormalsFolder, Constants.ModelsFolder, Constants.ScarFolder], [Constants.ModelsFolder], Constants.NormalsFolder, Constants.additionalMaterialMappings);
 
-        var dollMetaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues - Doll Addon", Author = "Scar", Version = Constants.Version };
-        CreateMod(Constants.InputPath, Constants.DollOutputPath, Constants.DollMaterialFolder, dollMetaFile, [Constants.ScarFolder], null, null, Constants.additionalDollMappings, false);
+        //var dollMetaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues - Doll Addon", Author = "Scar", Version = Constants.Version };
+        //CreateMod(Constants.InputPath, Constants.DollOutputPath, Constants.DollMaterialFolder, dollMetaFile, [Constants.ScarFolder], null, null, Constants.additionalDollMappings, false);
 
         var iceMetaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues - Ice Addon", Author = "Scar", Version = Constants.Version };
         CreateIceMod(Constants.InputPath, Constants.IceOutputPath, Constants.MaterialsFolder, Constants.NormalsFolder, iceMetaFile, Constants.additionalMaterialMappings);
@@ -84,18 +86,20 @@ public class ModFileBulkEditorMain
 
         var normalsInputPath = Path.Combine(inputPath, normalMapsFolderName);
         var normalsOutputPath = Path.Combine(outputPath, normalMapsFolderName);
+        var normalsAdditionalInputPath = Path.Combine(inputPath, Constants.AdditionalNormalsFolder);
 
         var normalsOptionOutputPath = Path.Combine(normalsOutputPath, "Ice Normals");
         ConvertDirectory(normalsInputPath, normalsOptionOutputPath, null, TextureConvertors.ConvertIceTextures);
-        
-        
+        ConvertDirectory(normalsAdditionalInputPath, normalsOptionOutputPath, null, TextureConvertors.ConvertIceTextures);
+
+
         JSONFileCreator fileCreator = new(outputPath, splitHairAndFaceOptions);
 
         fileCreator.WriteJSONFile(Constants.metaOutputJSONFile, metaFile, false);
         fileCreator.WriteJSONFile(Constants.defaultOutputJSONFile, new Models.PenumbraDefaultSubMod() { }, false);
 
+        fileCreator.WriteFileRedirectionsToJSONFile(normalMapsFolderName, Constants.additionalNormalIceMappings);
         fileCreator.WriteFileRedirectionsToJSONFile(materialsFolderName, additionalMaterialMappings);
-        fileCreator.WriteStatueRequiredFiles(materialsFolderName, normalMapsFolderName);
     }
 
     private static void ConvertDirectory(string folderPath, string newDirectoryPath, MaterialConvertor? materialConvertor = null, TextureConvertor? textureConvertor = null)

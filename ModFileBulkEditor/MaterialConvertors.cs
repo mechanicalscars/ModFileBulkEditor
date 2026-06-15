@@ -1,3 +1,4 @@
+using System.Formats.Asn1;
 using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Structs;
@@ -97,10 +98,32 @@ public class MaterialConvertors
 
     public static void turnMaterialWhiteLatex(FileInfo inputFile, string outputFilePath)
     {
-        turnMaterialLatexInternal(inputFile, outputFilePath, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        var material = turnMaterialLatexInternal(inputFile, outputFilePath, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    private static void turnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, HalfColor diffuseColor, HalfColor specularColor)
+
+    public static void turnMaterialWhiteDyeableLatex(FileInfo inputFile, string outputFilePath)
+    {
+        var material = turnMaterialLatexInternal(inputFile, outputFilePath, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        IColorDyeTable? Table = material.DyeTable;
+        if (Table == null)
+        {
+            Table = new ColorDyeTable();
+        }
+
+        if (Table is ColorDyeTable table)
+        {
+            table[30].DiffuseColor = true;
+            table[30].Channel = (byte)1u;
+            table[30].Template = 1100;
+
+        }
+        material.DyeTable = Table;
+       File.WriteAllBytes(outputFilePath, material.Write());
+    }
+
+    private static MtrlFile turnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, HalfColor diffuseColor, HalfColor specularColor)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -109,7 +132,6 @@ public class MaterialConvertors
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-
             table[30].DiffuseColor = diffuseColor;
             table[30].SpecularColor = specularColor;
             table[30].Roughness = (Half)0.00;
@@ -119,8 +141,7 @@ public class MaterialConvertors
             table[30].SheenAperture = (Half)5.0;
             table[30].Scalar11 = (Half)1.0;
         }
-
-        File.WriteAllBytes(outputFilePath, material.Write());
+        return material;
     }
 
     private static MtrlFile MetaDataConversion(MtrlFile material)
@@ -129,7 +150,12 @@ public class MaterialConvertors
         {
             material.MigrateToDawntrail();
         }
+        ref var shaderFlags = ref ShaderFlags.Wrap(ref material.ShaderPackage.Flags);
+        shaderFlags.EnableTransparency = true;
+        shaderFlags.HideBackfaces = true;
+        material.ShaderPackage.Flags = shaderFlags.Flags;
         material.ShaderPackage.Name = Constants.CharacterPackageName;
+        //material.ShaderPackage.Flags.EnableTransperency
         material.GetOrAddShaderKey(Constants.shaderVertexModeKey, Constants.vertexModeMulti);
         material.GetOrAddShaderKey(Constants.shaderTextureModeKey, Constants.textureModeCompatability);
 

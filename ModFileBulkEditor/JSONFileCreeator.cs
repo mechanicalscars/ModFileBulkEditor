@@ -44,7 +44,10 @@ public class JSONFileCreator
     public void WriteFileRedirectionsToJSONFile(string optionDirectory, Dictionary<string, string>? additionalMappings = null)
     {
         var optionPath = Path.Join(modPath, optionDirectory);
-
+        if (!Path.Exists(optionPath))
+        {
+            return;
+        }
         var childDirectories = Directory.GetDirectories(optionPath).ToList();
 
         var modOptions = GetOptionsFromDirectory(childDirectories, additionalMappings);
@@ -284,6 +287,11 @@ public class JSONFileCreator
 
     private static MaterialTexturePaths GetStatueTexturesFromMaterialsDirectory(string directoryPath)
     {
+        if (!Path.Exists(directoryPath))
+        {
+            return new MaterialTexturePaths();
+        }
+
         MaterialTexturePaths texturePaths = new();
         string[] childDirectories = Directory.GetDirectories(directoryPath);
         string[] childFiles = Directory.GetFiles(directoryPath);
