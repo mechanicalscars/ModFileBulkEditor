@@ -1,19 +1,18 @@
-using System.Formats.Asn1;
 using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Structs;
 
 namespace ModFileBulkEditor;
 
-public delegate void MaterialConvertor(FileInfo inputFile, string outputFilePath);
+public delegate void MaterialConvertor(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath);
 
 public class MaterialConvertors
 {
-    public static void turnMaterialStoneMarble(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialStoneMarble(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
-        material = MetaDataConversion(material);
+        material = MetaDataConversion(material, shdrPk);
 
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
@@ -31,11 +30,11 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialStoneMatte(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialStoneMatte(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
-        material = MetaDataConversion(material);
+        material = MetaDataConversion(material, shdrPk);
 
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
@@ -53,11 +52,11 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialGold(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialGold(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
-        material = MetaDataConversion(material);
+        material = MetaDataConversion(material, shdrPk);
 
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
@@ -73,11 +72,11 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialJade(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialJade(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
-        material = MetaDataConversion(material);
+        material = MetaDataConversion(material, shdrPk);
 
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
@@ -96,16 +95,39 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialWhiteLatex(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialIce(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
-        var material = turnMaterialLatexInternal(inputFile, outputFilePath, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material, shdrPk);
+
+        IColorTable? Table = material.Table;
+        if (Table is ColorTable table)
+        {
+
+            table[30].DiffuseColor = Constants.iceHalfColor;
+            table[30].Roughness = (Half)0.10;
+            table[30].Metalness = (Half)0.5;
+            table[30].SheenRate = (Half)0.20;
+            table[30].SheenTintRate = (Half)1;
+            table[30].SheenAperture = (Half)5.0;
+            table[30].Scalar11 = (Half)1.0;
+        }
+
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
 
-    public static void turnMaterialWhiteDyeableLatex(FileInfo inputFile, string outputFilePath)
+    public static void turnMaterialWhiteLatex(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
-        var material = turnMaterialLatexInternal(inputFile, outputFilePath, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        var material = turnMaterialLatexInternal(inputFile, outputFilePath, shdrPk, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        File.WriteAllBytes(outputFilePath, material.Write());
+    }
+
+
+    public static void turnMaterialWhiteDyeableLatex(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    {
+        var material = turnMaterialLatexInternal(inputFile, outputFilePath, shdrPk, Constants.whiteHalfColor, Constants.whiteHalfColor);
         IColorDyeTable? Table = material.DyeTable;
         if (Table == null)
         {
@@ -123,11 +145,11 @@ public class MaterialConvertors
        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    private static MtrlFile turnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, HalfColor diffuseColor, HalfColor specularColor)
+    private static MtrlFile turnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, ShpkFile shdrPk, HalfColor diffuseColor, HalfColor specularColor)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
-        material = MetaDataConversion(material);
+        material = MetaDataConversion(material, shdrPk);
 
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
@@ -144,7 +166,7 @@ public class MaterialConvertors
         return material;
     }
 
-    private static MtrlFile MetaDataConversion(MtrlFile material)
+    private static MtrlFile MetaDataConversion(MtrlFile material, ShpkFile shdrPk)
     {
         if (!material.IsDawntrail)
         {
@@ -169,7 +191,20 @@ public class MaterialConvertors
         Utils.SetSamplerTexturePath(material, ShpkFile.DiffuseSamplerId, diffusePath);
         Utils.SetSamplerTexturePath(material, ShpkFile.IndexSamplerId, indexPath);
         Utils.SetSamplerTexturePath(material, ShpkFile.MaskSamplerId, maskPath);
+        EditConstantValue(material, shdrPk, Constants.AlphaThresholdDivisorKey, Constants.AlphaThreshold);
 
         return material;
+    }
+
+    private static void EditConstantValue(MtrlFile material, ShpkFile shdrPk, uint constantKey, float newValue)
+    {
+        var constantIndex = material.FindOrAddConstant(constantKey, shdrPk);
+        if (constantIndex == -1)
+        {
+            throw new Exception("You didn't have the right constant key for the thing you were trying to update. Not even going to make it for you because this is just that fragile. Try again.");
+        }
+        var constant = material.ShaderPackage.Constants[constantIndex];
+        var constantValue = material.GetConstantValue<float>(constant);
+        constantValue.Fill(newValue);
     }
 }

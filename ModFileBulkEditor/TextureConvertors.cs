@@ -9,7 +9,7 @@ public delegate void TextureConvertor(FileInfo TextureFile, string outputFilePat
 public class TextureConvertors
 {
     // Matrixes are of the form BGRA, *not* Penubmra UI's RGBA
-    private static readonly Matrix4x4 seventyFivePercentBlue = new Matrix4x4(0.75f, 0.0f, 0.0f, 0.0f,
+    private static readonly Matrix4x4 seventyFivePercentBlue = new Matrix4x4(0.90f, 0.0f, 0.0f, 0.0f,
                                                                              0.0f, 1.0f, 0.0f, 0.0f,
                                                                              0.0f, 0.0f, 1.0f, 0.0f,
                                                                              0.0f, 0.0f, 0.0f, 1.0f);

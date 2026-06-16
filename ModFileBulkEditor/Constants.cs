@@ -14,6 +14,8 @@ public static class Constants
     public static readonly string IceOutputPath = "E:\\FFXIVModsDT\\[Scar] Statues - Ice";
     public static readonly string InputPath = "E:\\ScarMods\\Statues";
 
+    public static readonly string CharacterShaderPath = "E:\\ScarMods\\Statues\\character.shpk";
+
     public static readonly string ModelsFolder = "Model";
     public static readonly string MaterialsFolder = "Material";
     public static readonly string NormalsFolder = "Normal";
@@ -34,6 +36,7 @@ public static class Constants
     public static readonly string StoneMatteFolder = "Stone (Matte)";
     public static readonly string LatexFolder = "Latex";
     public static readonly string LatexDyeableFolder = "Latex (Dyeable)";
+    public static readonly string IceFolder = "Ice";
 
     public static readonly string ScarStoneTexturePath = "scar\\texture\\stone_lighter.tex";
     public static readonly string ScarStonex4TexturePath = "scar\\texture\\stone_lighter_x4.tex";
@@ -88,6 +91,7 @@ public static class Constants
     public static readonly HalfColor jadeHalfDarkerColour = Utils.getHalfColorFromRGB(25, 85, 85);
     public static readonly HalfColor jadeHalfSpecularColour = Utils.getHalfColorFromRGB(172, 254, 187);
     public static readonly HalfColor blackHalfColor = Utils.getHalfColorFromRGB(0, 0, 0);
+    public static readonly HalfColor iceHalfColor = Utils.getHalfColorFromRGB(189, 207, 244);
 
     public static readonly string CharacterPackageName = "character.shpk";
 
@@ -98,6 +102,9 @@ public static class Constants
 
     //static readonly uint fauxWindMultiplierKey = 1611594207;
     //static readonly uint FauxWindAmplitudeKey = 2815623008;
+    public static readonly uint AlphaThresholdDivisorKey = 699138595;
+
+    public static readonly uint AlphaThreshold = 1;
 
     public static readonly JsonSerializerOptions jsonSerializerOptions = new()
     {

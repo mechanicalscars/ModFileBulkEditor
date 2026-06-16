@@ -9,12 +9,12 @@ public class JSONFileCreator
 {
     int groupOffset = 1;
     private readonly string modPath;
-    private readonly bool splitHairAndFaceOptions;
+    private readonly bool splitOptions;
 
-    public JSONFileCreator(string modPath, bool splitHairAndFaceOptions)
+    public JSONFileCreator(string modPath, bool splitOptions)
     {
         this.modPath = modPath;
-        this.splitHairAndFaceOptions = splitHairAndFaceOptions;
+        this.splitOptions = splitOptions;
     }
 
     public void WriteJSONFile<T>(string fileName, T seralizeTarget, bool useGroup = true)
@@ -174,7 +174,8 @@ public class JSONFileCreator
 
     private void WriteMappingsToFiles(string fileName, List<PenumbraModOption> modOptions, bool single = false)
     {
-        if (splitHairAndFaceOptions)
+
+        if (splitOptions)
         {
             foreach ((var shortName, var pathsToSearch) in Constants.alternativePartsSplits)
             {
