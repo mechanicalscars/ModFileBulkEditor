@@ -8,7 +8,7 @@ public delegate void MaterialConvertor(FileInfo inputFile, ShpkFile shdrPk, stri
 
 public class MaterialConvertors
 {
-    public static void turnMaterialStoneMarble(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialStoneMarble(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -30,7 +30,7 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialStoneMatte(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialStoneMatte(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -52,7 +52,7 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialGold(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialGold(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -61,7 +61,6 @@ public class MaterialConvertors
         IColorTable? Table = material.Table;
         if (Table is ColorTable table)
         {
-
             table[30].DiffuseColor = Constants.AccentMaterialSubpaths.Any(s => inputFile.Name.Contains(s)) ? Constants.goldDarkerHalfColour : Constants.goldHalfColor;
             table[30].SpecularColor = Constants.whiteHalfColor;
             table[30].Roughness = (Half)0.15;
@@ -72,7 +71,7 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialJade(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialJade(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -95,7 +94,7 @@ public class MaterialConvertors
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    public static void turnMaterialIce(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialIce(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);
@@ -116,18 +115,38 @@ public class MaterialConvertors
 
         File.WriteAllBytes(outputFilePath, material.Write());
     }
-
-
-    public static void turnMaterialWhiteLatex(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialHologram(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
-        var material = turnMaterialLatexInternal(inputFile, outputFilePath, shdrPk, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        byte[] file = File.ReadAllBytes(inputFile.FullName);
+        MtrlFile material = new(file);
+        material = MetaDataConversion(material, shdrPk);
+
+        IColorTable? Table = material.Table;
+        if (Table is ColorTable table)
+        {
+            table[30].DiffuseColor = Constants.hologramHalfColor;
+            table[30].Roughness = (Half)1;
+            table[30].Metalness = (Half)0.5;
+            table[30].SheenRate = (Half)0.60;
+            table[30].SheenTintRate = (Half)1;
+            table[30].SheenAperture = (Half)5.0;
+            table[30].Scalar11 = (Half)1.0;
+        }
+
         File.WriteAllBytes(outputFilePath, material.Write());
     }
 
 
-    public static void turnMaterialWhiteDyeableLatex(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    public static void TurnMaterialWhiteLatex(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
     {
-        var material = turnMaterialLatexInternal(inputFile, outputFilePath, shdrPk, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        var material = TurnMaterialLatexInternal(inputFile, outputFilePath, shdrPk, Constants.whiteHalfColor, Constants.whiteHalfColor);
+        File.WriteAllBytes(outputFilePath, material.Write());
+    }
+
+
+    public static void TurnMaterialWhiteDyeableLatex(FileInfo inputFile, ShpkFile shdrPk, string outputFilePath)
+    {
+        var material = TurnMaterialLatexInternal(inputFile, outputFilePath, shdrPk, Constants.whiteHalfColor, Constants.whiteHalfColor);
         IColorDyeTable? Table = material.DyeTable;
         if (Table == null)
         {
@@ -145,7 +164,7 @@ public class MaterialConvertors
        File.WriteAllBytes(outputFilePath, material.Write());
     }
 
-    private static MtrlFile turnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, ShpkFile shdrPk, HalfColor diffuseColor, HalfColor specularColor)
+    private static MtrlFile TurnMaterialLatexInternal(FileInfo inputFile, string outputFilePath, ShpkFile shdrPk, HalfColor diffuseColor, HalfColor specularColor)
     {
         byte[] file = File.ReadAllBytes(inputFile.FullName);
         MtrlFile material = new(file);

@@ -3,23 +3,24 @@
 public class ModFileBulkEditorMain
 {
     private static readonly List<(string, string, MaterialConvertor?, TextureConvertor?)> FoldersAndConvertors = [
-        (Constants.StoneMarbleFolder, Constants.MaterialsFolder, MaterialConvertors.turnMaterialStoneMarble, null),
-        (Constants.StoneMatteFolder, Constants.MaterialsFolder, MaterialConvertors.turnMaterialStoneMatte, null),
-        (Constants.GoldFolder, Constants.MaterialsFolder, MaterialConvertors.turnMaterialGold, null),
-        (Constants.JadeFolder, Constants.MaterialsFolder, MaterialConvertors.turnMaterialJade, null),
-        (Constants.LatexFolder,Constants.MaterialsFolder, MaterialConvertors.turnMaterialWhiteLatex, null),
-        (Constants.LatexDyeableFolder, Constants.MaterialsFolder, MaterialConvertors.turnMaterialWhiteDyeableLatex, null),
+        (Constants.StoneMarbleFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialStoneMarble, null),
+        (Constants.StoneMatteFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialStoneMatte, null),
+        (Constants.GoldFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialGold, null),
+        (Constants.JadeFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialJade, null),
+        (Constants.LatexFolder,Constants.MaterialsFolder, MaterialConvertors.TurnMaterialWhiteLatex, null),
+        (Constants.LatexDyeableFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialWhiteDyeableLatex, null),
     ];
 
     private static readonly List<(string, string, MaterialConvertor?, TextureConvertor?)> SeeThroughFolders = [
-        (Constants.IceFolder, Constants.MaterialsFolder, MaterialConvertors.turnMaterialIce, null)
+        (Constants.IceFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialIce, null),
+        (Constants.HologramFolder, Constants.MaterialsFolder, MaterialConvertors.TurnMaterialHologram, null)
     ];
 
     public static void Main(string[] args)
     {
         var metaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues", Author = "Scar", Description = Constants.StatueModDescription, Version = Constants.Version };
-        CreateMod(metaFile, Constants.InputPath, Constants.OutputPath, Constants.MaterialsFolder,  [Constants.NormalsFolder, Constants.ModelsFolder, Constants.ScarFolder], Constants.additionalMaterialMappings, Constants.NormalsFolder, [Constants.ModelsFolder]);
-       
+        CreateMod(metaFile, Constants.InputPath, Constants.OutputPath, Constants.MaterialsFolder, [Constants.NormalsFolder, Constants.ModelsFolder, Constants.ScarFolder], Constants.additionalMaterialMappings, Constants.NormalsFolder, [Constants.ModelsFolder]);
+
         var dollMetaFile = new Models.PenumbraMetaFile() { Name = "[Scar] Statues - Doll Addon", Author = "Scar", Version = Constants.Version };
         CreateMod(dollMetaFile, Constants.InputPath, Constants.DollOutputPath, Constants.DollMaterialFolder, [Constants.ScarFolder], Constants.additionalDollMappings);
 

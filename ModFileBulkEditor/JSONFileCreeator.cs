@@ -51,8 +51,14 @@ public class JSONFileCreator
         var childDirectories = Directory.GetDirectories(optionPath).ToList();
 
         var modOptions = GetOptionsFromDirectory(childDirectories, additionalMappings);
-
-        WriteMappingsToFiles(optionDirectory, modOptions, true);
+        if (modOptions.Count == 1)
+        {
+            WriteMappingToFileAsMulti(optionDirectory, modOptions);
+        }
+        else
+        {
+            WriteMappingsToFiles(optionDirectory, modOptions, true);
+        }
     }
 
     private List<PenumbraModOption> GetOptionsFromDirectory(List<string> directories, Dictionary<string, string>? additionalMappings = null)
@@ -172,11 +178,46 @@ public class JSONFileCreator
 
     }
 
+    private void WriteMappingToFileAsMulti(string fileName, List<PenumbraModOption> modOptions)
+    {
+        List<PenumbraModOption> multiOptionsList = [];
+        if (splitOptions)
+        {
+            foreach ((var shortName, var pathsToSearch) in Constants.alternativePartsSplits)
+            {
+                List<PenumbraModOption> partMappings = [];
+                for (int i = 0; i < modOptions.Count; i++)
+                {
+                    (modOptions[i], var matchingModOption) = SplitMappingByRegexInKey(modOptions[i], pathsToSearch, shortName);
+                    if (matchingModOption != null)
+                    {
+                        partMappings.Add((PenumbraModOption)matchingModOption);
+                    }
+                }
+                if (partMappings.Count > 0)
+                {
+                    multiOptionsList.AddRange(partMappings);
+                }
+            }
+            modOptions = RemoveEmptyModOptions(modOptions);
+        }
+
+        if (modOptions.Count > 0)
+        {
+            multiOptionsList.AddRange(modOptions);
+        }
+        if (multiOptionsList.Count > 0)
+        {
+            WriteMappingsToFileAsOptions(fileName, multiOptionsList, false);
+        }
+    }
+
     private void WriteMappingsToFiles(string fileName, List<PenumbraModOption> modOptions, bool single = false)
     {
 
         if (splitOptions)
         {
+            List<PenumbraModOption> singleOptionsList = [];
             foreach ((var shortName, var pathsToSearch) in Constants.alternativePartsSplits)
             {
                 List<PenumbraModOption> partMappings = [];
@@ -244,7 +285,7 @@ public class JSONFileCreator
         WriteJSONFile(fileName, modFile);
     }
     
-    private static (PenumbraModOption, PenumbraModOption?) SplitMappingByRegexInKey(PenumbraModOption originalModFile, List<string> pathsToSearch)
+    private static (PenumbraModOption, PenumbraModOption?) SplitMappingByRegexInKey(PenumbraModOption originalModFile, List<string> pathsToSearch, string? shortName = null)
     {
         var falseFileMappings = originalModFile.Files.Where(x => !pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
         var falseFileSwapMappings = originalModFile.FileSwaps.Where(x => !pathsToSearch.Any(s => x.Key.Contains(s))).ToDictionary();
@@ -257,7 +298,8 @@ public class JSONFileCreator
         PenumbraModOption? splitModFile = null;
         if(trueFileMappings.Count > 0 || trueFileSwapMappings.Count > 0)
         {
-            splitModFile = new PenumbraModOption() { Name = originalModFile.Name, Files = trueFileMappings, FileSwaps = trueFileSwapMappings, Description = originalModFile.Description };
+            var name = shortName == null ? originalModFile.Name : shortName;
+            splitModFile = new PenumbraModOption() { Name = name, Files = trueFileMappings, FileSwaps = trueFileSwapMappings, Description = originalModFile.Description };
         }
         return (originalModFile, splitModFile); 
     }

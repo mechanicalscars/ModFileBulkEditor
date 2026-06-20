@@ -37,6 +37,7 @@ public static class Constants
     public static readonly string LatexFolder = "Latex";
     public static readonly string LatexDyeableFolder = "Latex (Dyeable)";
     public static readonly string IceFolder = "Ice";
+    public static readonly string HologramFolder = "Hologram";
 
     public static readonly string ScarStoneTexturePath = "scar\\texture\\stone_lighter.tex";
     public static readonly string ScarStonex4TexturePath = "scar\\texture\\stone_lighter_x4.tex";
@@ -45,6 +46,7 @@ public static class Constants
     public static readonly string ScarGraniteTexturePath = "scar\\texture\\granite.tex";
     public static readonly string ScarGranitex4TexturePath = "scar\\texture\\granite_x4.tex";
     public static readonly string SmoothNomalsTexturePath = "scar\\texture\\smooth_normal.tex";
+    public static readonly string IceTexturePath = "scar\\texture\\ice.tex";
 
     public static readonly string WhiteTexturePath = "chara\\common\\texture\\white.tex";
     public static readonly string BlackTexturePath = "chara\\common\\texture\\black.tex";
@@ -66,13 +68,15 @@ public static class Constants
     public static readonly string diffuseGraniteName = "Granite";
     public static readonly string diffuseWhiteName = "Pure White";
     public static readonly string diffuseBlackName = "Pure Black";
+    public static readonly string diffuseIceName = "Ice";
 
     public static readonly List<(string, string, string)> diffuseMappings = [
     (diffuseMarbleName, ScarStonex4TexturePath, ScarStoneTexturePath),
         (diffuseDarkMarbleName, ScarStoneDarkerx4TexturePath, ScarStoneDarkerTexturePath),
         (diffuseGraniteName, ScarGranitex4TexturePath, ScarGraniteTexturePath),
         (diffuseWhiteName, WhiteTexturePath, WhiteTexturePath),
-        (diffuseBlackName, BlackTexturePath, BlackTexturePath)
+        (diffuseBlackName, BlackTexturePath, BlackTexturePath),
+        (diffuseIceName, IceTexturePath, IceTexturePath)
     ];
 
     public static readonly string vanillaNormalsOptionName = "Massaged Normals";
@@ -92,6 +96,7 @@ public static class Constants
     public static readonly HalfColor jadeHalfSpecularColour = Utils.getHalfColorFromRGB(172, 254, 187);
     public static readonly HalfColor blackHalfColor = Utils.getHalfColorFromRGB(0, 0, 0);
     public static readonly HalfColor iceHalfColor = Utils.getHalfColorFromRGB(189, 207, 244);
+    public static readonly HalfColor hologramHalfColor = Utils.getHalfColorFromRGB(0, 155, 255);
 
     public static readonly string CharacterPackageName = "character.shpk";
 
@@ -104,7 +109,7 @@ public static class Constants
     //static readonly uint FauxWindAmplitudeKey = 2815623008;
     public static readonly uint AlphaThresholdDivisorKey = 699138595;
 
-    public static readonly uint AlphaThreshold = 1;
+    public static readonly float AlphaThreshold = 0.75f;
 
     public static readonly JsonSerializerOptions jsonSerializerOptions = new()
     {
@@ -247,5 +252,5 @@ public static class Constants
         "To fix that, you will have to remove the vertex colours on the 3D model on a case by case basis. Might be better just to find an upscale somewhere, apologies.\n" +
         "In addition, face paints do not play nicely with the character shader, so please remove them and your vanilla facial tattoos (other facial features should still work though).";
 
-    public static readonly string SmoothNormalsDescription = "For when you want your statues to have less texture. Hair not included.";
+    public static readonly string SmoothNormalsDescription = "For when you want your statues to have less texture.";
 }
